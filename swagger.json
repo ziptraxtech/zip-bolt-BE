@@ -1,0 +1,1198 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ZipSureAI API",
+    "description": "Fleet operations and job allocation platform API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ZipSureAI Team",
+      "email": "support@zipsure.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": ["email", "password", "firstName", "lastName", "role"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address (unique)"
+          },
+          "password": {
+            "type": "string",
+            "description": "Hashed password"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "User's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "User's last name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "User's phone number"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["superadmin", "admin", "allocator", "rider"],
+            "description": "User's role in the system"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the organization the user belongs to"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the user account is active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Organization name"
+          },
+          "address": {
+            "type": "string",
+            "description": "Organization address"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State/Province"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Contact email address"
+          },
+          "gstNumber": {
+            "type": "string",
+            "description": "GST registration number"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the organization is active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SubscriptionPlan": {
+        "type": "object",
+        "required": ["name", "price", "maxVehicles", "maxUsers", "durationDays"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Plan name (e.g., Basic, Premium, Enterprise)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Plan description"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Plan price in INR"
+          },
+          "maxVehicles": {
+            "type": "integer",
+            "description": "Maximum number of vehicles allowed"
+          },
+          "maxUsers": {
+            "type": "integer",
+            "description": "Maximum number of users allowed"
+          },
+          "durationDays": {
+            "type": "integer",
+            "description": "Plan duration in days"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the plan is active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "required": ["organizationId", "planId", "startDate", "endDate", "amount"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the subscribing organization"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the subscription plan"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Subscription start date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Subscription end date"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "expired", "cancelled", "pending"],
+            "description": "Subscription status"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "description": "Subscription amount in INR"
+          },
+          "paymentId": {
+            "type": "string",
+            "description": "Payment reference ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Vehicle": {
+        "type": "object",
+        "required": ["organizationId", "vehicleNumber"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the organization that owns the vehicle"
+          },
+          "vehicleNumber": {
+            "type": "string",
+            "description": "Vehicle registration number"
+          },
+          "vehicleType": {
+            "type": "string",
+            "description": "Type of vehicle (e.g., Bike, Car, Truck)"
+          },
+          "model": {
+            "type": "string",
+            "description": "Vehicle model"
+          },
+          "make": {
+            "type": "string",
+            "description": "Vehicle manufacturer"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Manufacturing year"
+          },
+          "color": {
+            "type": "string",
+            "description": "Vehicle color"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive", "maintenance"],
+            "description": "Vehicle status"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "required": ["organizationId", "allocatorId", "title", "pickupLocation", "deliveryLocation"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the organization managing the job"
+          },
+          "allocatorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the allocator who created the job"
+          },
+          "riderId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the rider assigned to the job"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the vehicle assigned to the job"
+          },
+          "title": {
+            "type": "string",
+            "description": "Job title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed job description"
+          },
+          "pickupLocation": {
+            "type": "string",
+            "description": "Pickup location address"
+          },
+          "deliveryLocation": {
+            "type": "string",
+            "description": "Delivery location address"
+          },
+          "pickupLatitude": {
+            "type": "number",
+            "format": "float",
+            "description": "Pickup location latitude"
+          },
+          "pickupLongitude": {
+            "type": "number",
+            "format": "float",
+            "description": "Pickup location longitude"
+          },
+          "deliveryLatitude": {
+            "type": "number",
+            "format": "float",
+            "description": "Delivery location latitude"
+          },
+          "deliveryLongitude": {
+            "type": "number",
+            "format": "float",
+            "description": "Delivery location longitude"
+          },
+          "scheduledTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scheduled job time"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["assigned", "accepted", "in_progress", "completed", "cancelled"],
+            "description": "Current job status"
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job was assigned"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job was started"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job was completed"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JobLog": {
+        "type": "object",
+        "required": ["jobId", "userId", "action"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the job being logged"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the user performing the action"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action performed (e.g., created, assigned, accepted, started, completed)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the action"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Additional data related to the action"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the log entry was created"
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "required": ["subscriptionId", "amount"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the subscription being paid for"
+          },
+          "razorpayOrderId": {
+            "type": "string",
+            "description": "Razorpay order ID"
+          },
+          "razorpayPaymentId": {
+            "type": "string",
+            "description": "Razorpay payment ID"
+          },
+          "amount": {
+            "type": "number",
+            "format": "float",
+            "description": "Payment amount in INR"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "completed", "failed", "refunded"],
+            "description": "Payment status"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Payment currency (default INR)"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the payment was completed"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check endpoint",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User registration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "firstName", "lastName", "role", "organizationId", "phone"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "allocator", "rider"]
+                  },
+                  "organizationId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": ["admin", "allocator", "rider"]
+            },
+            "description": "Filter by role"
+          },
+          {
+            "in": "query",
+            "name": "isActive",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter by active status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create new user (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "firstName", "lastName", "role"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "allocator", "rider"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get user by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations": {
+      "get": {
+        "tags": ["Organizations"],
+        "summary": "Get all organizations (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of organizations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Organization"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Organizations"],
+        "summary": "Create organization",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "gstNumber": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Organization created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/plans": {
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get available subscription plans",
+        "responses": {
+          "200": {
+            "description": "List of subscription plans",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SubscriptionPlan"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Create subscription (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["planId"],
+                "properties": {
+                  "planId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/vehicles": {
+      "get": {
+        "tags": ["Vehicles"],
+        "summary": "Get vehicles for organization",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of vehicles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Vehicle"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Vehicles"],
+        "summary": "Create vehicle (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["vehicleNumber"],
+                "properties": {
+                  "vehicleNumber": {
+                    "type": "string"
+                  },
+                  "vehicleType": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "make": {
+                    "type": "string"
+                  },
+                  "year": {
+                    "type": "integer"
+                  },
+                  "color": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vehicle created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get jobs for organization",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": ["assigned", "accepted", "in_progress", "completed", "cancelled"]
+            },
+            "description": "Filter by status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Job"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Jobs"],
+        "summary": "Create job (Allocator only)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "pickupLocation", "deliveryLocation"],
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "pickupLocation": {
+                    "type": "string"
+                  },
+                  "deliveryLocation": {
+                    "type": "string"
+                  },
+                  "pickupLatitude": {
+                    "type": "number"
+                  },
+                  "pickupLongitude": {
+                    "type": "number"
+                  },
+                  "deliveryLatitude": {
+                    "type": "number"
+                  },
+                  "deliveryLongitude": {
+                    "type": "number"
+                  },
+                  "scheduledTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "riderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "vehicleId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/{id}": {
+      "put": {
+        "tags": ["Jobs"],
+        "summary": "Update job status",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["accepted", "in_progress", "completed", "cancelled"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job updated successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/payments/create-order": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Create payment order",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["subscriptionId", "amount"],
+                "properties": {
+                  "subscriptionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "amount": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment order created"
+          }
+        }
+      }
+    },
+    "/api/v1/payments/verify": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Verify payment",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["razorpayOrderId", "razorpayPaymentId", "razorpaySignature"],
+                "properties": {
+                  "razorpayOrderId": {
+                    "type": "string"
+                  },
+                  "razorpayPaymentId": {
+                    "type": "string"
+                  },
+                  "razorpaySignature": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment verified successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/superadmin": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Superadmin dashboard",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Superadmin analytics data"
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/admin": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Admin dashboard",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Admin analytics data"
+          }
+        }
+      }
+    }
+  }
+} 

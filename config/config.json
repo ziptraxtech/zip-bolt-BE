@@ -1,0 +1,35 @@
+{
+  "development": {
+    "username": "my_user",
+    "password": "my_secure_password",
+    "database": "zipsure_ai",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": true
+  },
+  "test": {
+    "username": "my_user",
+    "password": "my_secure_password",
+    "database": "zipsure_ai_test",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false
+  },
+  "production": {
+    "username": "my_user",
+    "password": "my_secure_password",
+    "database": "zipsure_ai",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false,
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    }
+  }
+} 
