@@ -21,7 +21,7 @@ A comprehensive fleet operations and job allocation platform designed for organi
 - **Real-time**: Socket.io for notifications
 - **Documentation**: Swagger/OpenAPI
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js (v16 or higher)
 - PostgreSQL (v12 or higher)
@@ -51,7 +51,7 @@ The application will be available at `http://localhost:3000` with demo credentia
 - **Allocator**: allocator@demologistics.com / password123
 - **Rider**: rider1@demologistics.com / password123
 
-## 🛠️ Detailed Installation
+## Detailed Installation
 
 ```bash
 git clone https://github.com/zip-bolt/zip-bolt-BE.git
@@ -196,7 +196,7 @@ The application uses the following main entities:
 - Accept/reject job assignments
 - Update job progress
 
-## 🧪 Testing
+## Testing
 
 Run the test suite:
 
@@ -279,7 +279,7 @@ zip-bolt/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 Graphs
+## Graphs
 
 see the [Graphs](graph.md) file for details.
 
@@ -314,7 +314,7 @@ see the [Graphs](graph.md) file for details.
 
 For support and questions, please contact the development team or create an issue in the repository.
 
-## 🔄 Version History
+## Version History
 
 - **v1.0.0** - Initial release with core functionality
   - Role-based authentication
