@@ -1,8 +1,8 @@
-# ZipSureAI Software
+# ZipSureAI Software Backend
 
 A comprehensive fleet operations and job allocation platform designed for organizations to manage riders, allocate jobs, monitor performance, and handle payments through a role-based system.
 
-## 🚀 Features
+## Features
 
 - **Role-Based Access Control**: Superadmin, Admin, Allocator, and Rider roles
 - **Subscription Management**: Plan-based subscriptions with payment integration
@@ -12,7 +12,7 @@ A comprehensive fleet operations and job allocation platform designed for organi
 - **Real-time Notifications**: Socket.io for instant job notifications
 - **API Documentation**: Swagger/OpenAPI documentation
 
-## 🏗️ Architecture
+## Architecture
 
 - **Backend**: Node.js with Express.js
 - **Database**: PostgreSQL with Sequelize ORM
@@ -27,13 +27,13 @@ A comprehensive fleet operations and job allocation platform designed for organi
 - PostgreSQL (v12 or higher)
 - npm or yarn package manager
 
-## 🚀 Quick Start
+## Quick Start
 
 For developers who want to get up and running quickly:
 
 ```bash
 # Clone and setup
-git clone https://github.com/zip-bolt/zip-bolt.git
+git clone https://github.com/zip-bolt/zip-bolt-BE.git
 cd zip-bolt
 npm install
 
@@ -54,7 +54,7 @@ The application will be available at `http://localhost:3000` with demo credentia
 ## 🛠️ Detailed Installation
 
 ```bash
-git clone https://github.com/zip-bolt/zip-bolt.git
+git clone https://github.com/zip-bolt/zip-bolt-BE.git
 cd zip-bolt
 ```
 
@@ -141,7 +141,7 @@ npm start
 
 The application will be available at `http://localhost:3000`
 
-## 📊 Demo Data
+## Demo Data
 
 The application comes with pre-seeded demo data including:
 
@@ -153,7 +153,7 @@ The application comes with pre-seeded demo data including:
 
 You can reset the demo data anytime using: `npm run db:reset`
 
-## 📚 API Documentation
+## API Documentation
 
 Once the server is running, you can access the Swagger API documentation at:
 
@@ -161,7 +161,7 @@ Once the server is running, you can access the Swagger API documentation at:
 http://localhost:3000/api-docs
 ```
 
-## 🗄️ Database Schema
+## Database Schema
 
 The application uses the following main entities:
 
@@ -173,7 +173,7 @@ The application uses the following main entities:
 - **Jobs**: Job allocation and tracking
 - **Payments**: Payment history and transactions
 
-## 🔐 Roles and Permissions
+## Roles and Permissions
 
 ### Superadmin
 - Manage organization-wide settings
@@ -204,7 +204,7 @@ Run the test suite:
 npm test
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 zip-bolt/
@@ -234,7 +234,7 @@ zip-bolt/
 - `npm run db:reset` - Reset database completely (drop, create, migrate, seed)
 - `npm run db:setup` - Setup database (check PostgreSQL, create DB, migrate, seed)
 
-## 🌐 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/v1/auth/login` - User login
@@ -271,7 +271,7 @@ zip-bolt/
 - `GET /api/v1/analytics/superadmin` - Superadmin dashboard
 - `GET /api/v1/analytics/admin` - Admin dashboard
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -279,15 +279,15 @@ zip-bolt/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## 📄 Graphs
 
-This project is licensed under the MIT License - see the [LICENSE](graph.md) file for details.
+see the [Graphs](graph.md) file for details.
 
-## 👨‍💻 Author
+## Author
 
 **Dhruv Shridhar**
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
