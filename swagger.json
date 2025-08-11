@@ -790,6 +790,7 @@
       "post": {
         "tags": ["Organizations"],
         "summary": "Create organization",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
@@ -839,6 +840,7 @@
       "get": {
         "tags": ["Subscriptions"],
         "summary": "Get available subscription plans",
+        "security": [{"bearerAuth": []}],
         "responses": {
           "200": {
             "description": "List of subscription plans",
