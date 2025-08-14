@@ -166,8 +166,8 @@ const Job = sequelize.define('Job', {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('assigned', 'accepted', 'in_progress', 'completed', 'cancelled'),
-    defaultValue: 'assigned'
+    type: DataTypes.ENUM('yet to be assigned','assigned','accepted','in_progress','completed','cancelled'),
+    defaultValue: 'yet to be assigned'
   },
   assignedAt: {
     type: DataTypes.DATE,
