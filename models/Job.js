@@ -98,7 +98,7 @@ const Job = sequelize.define('Job', {
     defaultValue: DataTypes.UUIDV4
   },
   organizationId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: false,
     references: {
       model: 'organizations',
@@ -106,7 +106,7 @@ const Job = sequelize.define('Job', {
     }
   },
   allocatorId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: false,
     references: {
       model: 'users',
@@ -114,7 +114,7 @@ const Job = sequelize.define('Job', {
     }
   },
   riderId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: true,
     references: {
       model: 'users',
@@ -122,7 +122,7 @@ const Job = sequelize.define('Job', {
     }
   },
   vehicleId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: true,
     references: {
       model: 'vehicles',

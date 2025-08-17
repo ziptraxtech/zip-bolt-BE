@@ -91,7 +91,7 @@ const User = sequelize.define('User', {
     defaultValue: 'rider'
   },
   organizationId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: true,
     references: {
       model: 'organizations',

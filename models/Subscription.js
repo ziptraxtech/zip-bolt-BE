@@ -61,7 +61,7 @@ const Subscription = sequelize.define('Subscription', {
     defaultValue: DataTypes.UUIDV4
   },
   organizationId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: false,
     references: {
       model: 'organizations',
@@ -69,7 +69,7 @@ const Subscription = sequelize.define('Subscription', {
     }
   },
   planId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: false,
     references: {
       model: 'subscription_plans',
