@@ -210,7 +210,7 @@ const validateJobStatusUpdate = [
  */
 const validateSubscriptionCreation = [
   body('planId')
-    .isInt({ min: 1 })
+    .isUUID()
     .withMessage('Please provide a valid plan ID'),
   handleValidationErrors
 ];
