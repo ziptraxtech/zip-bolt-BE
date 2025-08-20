@@ -57,7 +57,7 @@ const Vehicle = sequelize.define('Vehicle', {
     defaultValue: DataTypes.UUIDV4
   },
   organizationId: {
-    type: DataTypes.UUID,
+    type: DataTypes.UUIDV4,
     allowNull: false,
     references: {
       model: 'organizations',

@@ -19,6 +19,7 @@ const vehicleRoutes = require('./routes/vehicles');
 const jobRoutes = require('./routes/jobs');
 const paymentRoutes = require('./routes/payments');
 const analyticsRoutes = require('./routes/analytics');
+const subscriptionPlanRoutes = require('./routes/subscriptionPlans');
 const { authenticateToken } = require('./middleware/auth');
 
 const app = express();
@@ -111,15 +112,13 @@ app.use('/api/v1/vehicles', authenticateToken, vehicleRoutes);
 app.use('/api/v1/jobs', authenticateToken, jobRoutes);
 app.use('/api/v1/payments', authenticateToken, paymentRoutes);
 app.use('/api/v1/analytics', authenticateToken, analyticsRoutes);
+app.use('/api/v1/subscriptionPlans', authenticateToken, subscriptionPlanRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-
   // Join organization room
   socket.on('join-organization', (organizationId) => {
     socket.join(`org-${organizationId}`);
-    console.log(`User ${socket.id} joined organization ${organizationId}`);
   });
 
   // Handle job notifications
@@ -133,7 +132,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
   });
 });
 

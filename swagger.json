@@ -182,6 +182,54 @@
           }
         }
       },
+      "Subscriptions": {
+        "type": "object",
+        "required": ["name", "price", "maxVehicles", "maxUsers", "durationDays"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Plan name (e.g., Basic, Premium, Enterprise)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Plan description"
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "description": "Plan price in INR"
+          },
+          "maxVehicles": {
+            "type": "integer",
+            "description": "Maximum number of vehicles allowed"
+          },
+          "maxUsers": {
+            "type": "integer",
+            "description": "Maximum number of users allowed"
+          },
+          "durationDays": {
+            "type": "integer",
+            "description": "Plan duration in days"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the plan is active"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "Subscription": {
         "type": "object",
         "required": ["organizationId", "planId", "startDate", "endDate", "amount"],
@@ -891,6 +939,161 @@
         "responses": {
           "201": {
             "description": "Subscription created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptionPlans": {
+      "post": {
+        "tags": ["Subscription Plans"],
+        "summary": "Create subscription plan (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "price", "maxVehicles", "maxUsers", "durationDays"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "maxVehicles": {
+                    "type": "integer"
+                  },
+                  "maxUsers": {
+                    "type": "integer"
+                  },
+                  "durationDays": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription plan created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptionPlans": {
+      "get": {
+        "tags": ["Subscription Plans"],
+        "summary": "Get subscription plan by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Subscription plan ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription plan details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionPlan"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptionPlans/{id}": {
+      "put": {
+        "tags": ["Subscription Plans"],
+        "summary": "Update subscription plan (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Subscription plan ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "price", "maxVehicles", "maxUsers", "durationDays"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "maxVehicles": {
+                    "type": "integer"
+                  },
+                  "maxUsers": {
+                    "type": "integer"
+                  },
+                  "durationDays": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription plan updated successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptionPlans/{id}": {
+      "delete": {
+        "tags": ["Subscription Plans"],
+        "summary": "Delete subscription plan (Admin only)",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Subscription plan ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription plan deleted successfully"
           }
         }
       }

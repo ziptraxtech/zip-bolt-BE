@@ -216,6 +216,34 @@ const validateSubscriptionCreation = [
 ];
 
 /**
+ * Validation rules for subscription plan creation
+ */
+const validateSubscriptionPlanCreation = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Plan name must be between 2 and 255 characters'),
+  body('description')
+    .optional()
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage('Description must not exceed 2000 characters'),
+  body('price')
+    .isFloat({ min: 0 })
+    .withMessage('Price must be a positive number'),
+  body('maxVehicles')
+    .isInt({ min: 1 })
+    .withMessage('Max vehicles must be a positive integer'),
+  body('maxUsers')
+    .isInt({ min: 1 })
+    .withMessage('Max users must be a positive integer'),
+  body('durationDays')
+    .isInt({ min: 1 })
+    .withMessage('Duration days must be a positive integer'),
+  handleValidationErrors
+];
+
+/**
  * Validation rules for payment verification
  */
 const validatePaymentVerification = [
@@ -226,8 +254,9 @@ const validatePaymentVerification = [
     .notEmpty()
     .withMessage('Razorpay payment ID is required'),
   body('razorpaySignature')
-    .notEmpty()
-    .withMessage('Razorpay signature is required'),
+    .optional()
+    .isString()
+    .withMessage('Razorpay signature must be a string'),
   handleValidationErrors
 ];
 
@@ -283,5 +312,6 @@ module.exports = {
   validatePaymentVerification,
   validatePagination,
   validateId,
-  validateDateRange
+  validateDateRange,
+  validateSubscriptionPlanCreation
 }; 
