@@ -943,7 +943,7 @@
         }
       }
     },
-    "/api/v1/subscriptionPlans": {
+    "/api/v1/subscriptionPlans/plan": {
       "post": {
         "tags": ["Subscription Plans"],
         "summary": "Create subscription plan (Admin only)",
@@ -992,18 +992,6 @@
         "tags": ["Subscription Plans"],
         "summary": "Get subscription plan by ID",
         "security": [{"bearerAuth": []}],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "description": "Subscription plan ID",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Subscription plan details",
@@ -1072,9 +1060,7 @@
             "description": "Subscription plan updated successfully"
           }
         }
-      }
-    },
-    "/api/v1/subscriptionPlans/{id}": {
+      },
       "delete": {
         "tags": ["Subscription Plans"],
         "summary": "Delete subscription plan (Admin only)",

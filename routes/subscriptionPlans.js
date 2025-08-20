@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create subscription plan
-router.post('/', requireSuperadmin, validateSubscriptionPlanCreation, async (req, res) => {
+router.post('/plan', requireSuperadmin, validateSubscriptionPlanCreation, async (req, res) => {
   try {
     const plan = await SubscriptionPlan.create(req.body);
     res.json({
