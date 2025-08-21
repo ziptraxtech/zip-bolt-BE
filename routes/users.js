@@ -1,7 +1,7 @@
 const express = require('express');
 const { User, Organization } = require('../models');
 const { validateUserRegistration, validatePagination, validateId } = require('../middleware/validation');
-const { requireAdmin, requireResourceAccess } = require('../middleware/auth');
+const { requireAdmin, requireResourceAccess, requireAllocator } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -173,7 +173,7 @@ router.get('/', requireAdmin, validatePagination, async (req, res) => {
  *       409:
  *         description: User already exists
  */
-router.post('/', requireAdmin, validateUserRegistration, async (req, res) => {
+router.post('/', requireAllocator, validateUserRegistration, async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone, role } = req.body;
 
@@ -462,7 +462,7 @@ router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, r
  *       403:
  *         description: Access denied
  */
-router.get('/organization/:organizationId', requireAdmin, async (req, res) => {
+router.get('/organization/:organizationId', requireAllocator, async (req, res) => {
   try {
     const { organizationId } = req.params;
     const { role } = req.query;
