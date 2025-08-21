@@ -66,7 +66,7 @@ const router = express.Router();
  *       403:
  *         description: Access denied
  */
-router.get('/', requireAdmin, validatePagination, async (req, res) => {
+router.get('/', requireAllocator, validatePagination, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
