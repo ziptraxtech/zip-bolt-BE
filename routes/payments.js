@@ -12,6 +12,10 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.warn('Razorpay keys are missing. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.');
+}
+
 // Create payment order
 router.post('/create-order', requireAdmin, async (req, res) => {
   try {
@@ -25,10 +29,13 @@ router.post('/create-order', requireAdmin, async (req, res) => {
       });
     }
 
+    const shortId = subscriptionId.slice(0, 8);
+    const receipt = `sub_${shortId}_${Date.now().toString(36)}`;
+
     const options = {
       amount: amount * 100, // Convert to paise
       currency: 'INR',
-      receipt: `sub_${subscriptionId}_${Date.now()}`
+      receipt: receipt
     };
 
     const order = await razorpay.orders.create(options);
@@ -52,10 +59,11 @@ router.post('/create-order', requireAdmin, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Create payment order error:', error);
-    res.status(500).json({
+    const details = error && error.error ? error.error : error;
+    console.error('Create payment order error:', details);
+    return res.status(500).json({
       error: 'Failed to create payment order',
-      message: 'Internal server error'
+      message: details && details.description ? details.description : 'Internal server error'
     });
   }
 });
@@ -65,19 +73,70 @@ router.post('/verify', validatePaymentVerification, async (req, res) => {
   try {
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
-    // Verify signature
-    const text = `${razorpayOrderId}|${razorpayPaymentId}`;
-    const crypto = require('crypto');
-    const signature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(text)
-      .digest('hex');
+    // Resolve actual Razorpay payment id if a local UUID was passed
+    let resolvedPaymentId = razorpayPaymentId;
+    if (!/^pay_/.test(razorpayPaymentId)) {
+      // Load our local payment record by UUID to ensure the order matches
+      const local = await Payment.findByPk(razorpayPaymentId);
+      if (!local || local.razorpayOrderId !== razorpayOrderId) {
+        return res.status(400).json({
+          error: 'Invalid payment reference',
+          message: 'Payment does not match the provided order'
+        });
+      }
+      // List payments for the order and pick a successful one
+      const list = await razorpay.orders.fetchPayments(razorpayOrderId);
+      const ok = (list && list.items || []).find(p => ['captured','authorized'].includes(p.status));
+      if (!ok) {
+        return res.status(400).json({
+          error: 'Payment not successful',
+          message: 'No successful payment found for this order'
+        });
+      }
+      resolvedPaymentId = ok.id; // pay_...
+    }
 
-    if (signature !== razorpaySignature) {
-      return res.status(400).json({
-        error: 'Invalid signature',
-        message: 'Payment verification failed'
-      });
+    // If signature provided, verify using HMAC
+    if (razorpaySignature) {
+      const text = `${razorpayOrderId}|${resolvedPaymentId}`;
+      const crypto = require('crypto');
+      const signature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(text)
+        .digest('hex');
+
+      if (signature !== razorpaySignature) {
+        return res.status(400).json({
+          error: 'Invalid signature',
+          message: 'Payment verification failed'
+        });
+      }
+    } else {
+      // Fallback: No signature was provided. Verify server-to-server with Razorpay API.
+      const remotePayment = await razorpay.payments.fetch(resolvedPaymentId);
+
+      if (!remotePayment) {
+        return res.status(404).json({
+          error: 'Payment not found',
+          message: 'Razorpay payment not found'
+        });
+      }
+
+      // Ensure payment belongs to the provided order
+      if (remotePayment.order_id !== razorpayOrderId) {
+        return res.status(400).json({
+          error: 'Payment-order mismatch',
+          message: 'Payment does not belong to the specified order'
+        });
+      }
+
+      // Accept only successful states
+      if (!['captured', 'authorized'].includes(remotePayment.status)) {
+        return res.status(400).json({
+          error: 'Payment not successful',
+          message: `Payment status is ${remotePayment.status}`
+        });
+      }
     }
 
     // Update payment record
@@ -90,7 +149,7 @@ router.post('/verify', validatePaymentVerification, async (req, res) => {
     }
 
     await payment.update({
-      razorpayPaymentId,
+      razorpayPaymentId: resolvedPaymentId,
       status: 'completed',
       paidAt: new Date()
     });
@@ -107,10 +166,11 @@ router.post('/verify', validatePaymentVerification, async (req, res) => {
       data: payment
     });
   } catch (error) {
-    console.error('Verify payment error:', error);
+    const details = error && error.error ? error.error : error;
+    console.error('Verify payment error:', details);
     res.status(500).json({
       error: 'Failed to verify payment',
-      message: 'Internal server error'
+      message: details && details.description ? details.description : 'Internal server error'
     });
   }
 });
