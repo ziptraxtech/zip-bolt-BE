@@ -1,7 +1,7 @@
 const express = require('express');
 const { Vehicle } = require('../models');
 const { validateVehicleCreation, validateId } = require('../middleware/validation');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin, requireAllocator } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -39,6 +39,22 @@ router.post('/', requireAdmin, validateVehicleCreation, async (req, res) => {
     console.error('Create vehicle error:', error);
     res.status(500).json({
       error: 'Failed to create vehicle',
+      message: 'Internal server error'
+    });
+  }
+});
+
+router.get('/organization', requireAllocator, async (req, res) => {
+  try {
+    const vehicles = await Vehicle.findByOrganization(req.user.organizationId);
+    res.json({
+      success: true,
+      data: vehicles
+    });
+  } catch (error) {
+    console.error('Get organization vehicles error:', error);
+    res.status(500).json({
+      error: 'Failed to get organization vehicles',
       message: 'Internal server error'
     });
   }
