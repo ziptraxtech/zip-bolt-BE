@@ -1366,7 +1366,7 @@
         }
       }
     },
-    "/api/v1/jobs/{id}": {
+    "/api/v1/jobs/{id}/status": {
       "put": {
         "tags": ["Jobs"],
         "summary": "Update job status",
