@@ -1,7 +1,7 @@
 const express = require('express');
 const { Job, JobLog } = require('../models');
 const { validateJobCreation, validateJobStatusUpdate, validateId } = require('../middleware/validation');
-const { authenticateToken, requireAllocator } = require('../middleware/auth');
+const { authenticateToken, requireAllocator, requireSuperadmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -82,6 +82,23 @@ router.put('/:id/status', authenticateToken, validateId, validateJobStatusUpdate
     console.error('Update job status error:', error);
     res.status(500).json({
       error: 'Failed to update job status',
+      message: 'Internal server error'
+    });
+  }
+});
+
+//get all jobs superadmin
+router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const jobs = await Job.findAll();
+    res.json({
+      success: true,
+      data: jobs
+    });
+  } catch (error) {
+    console.error('Get jobs error:', error);
+    res.status(500).json({
+      error: 'Failed to get jobs',
       message: 'Internal server error'
     });
   }

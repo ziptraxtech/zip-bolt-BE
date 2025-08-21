@@ -679,6 +679,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "Change user password",
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
@@ -1331,6 +1332,36 @@
         "responses": {
           "201": {
             "description": "Job created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/jobs/superadmin": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get all jobs (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Job"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
