@@ -1396,6 +1396,46 @@
         }
       }
     },
+    "/api/v1/jobs/my-jobs/{id}/status": {
+      "put": {
+        "tags": ["Jobs"],
+        "summary": "Update my job status",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["assigned", "accepted", "in_progress", "completed", "cancelled"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job status updated successfully"
+          }
+        }
+      }
+    },
     "/api/v1/jobs/{id}/status": {
       "put": {
         "tags": ["Jobs"],
@@ -1498,6 +1538,18 @@
         "responses": {
           "200": {
             "description": "Payment verified successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/payments/superadmin": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get all payments (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of payments"
           }
         }
       }

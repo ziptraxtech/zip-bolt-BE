@@ -1,8 +1,9 @@
 const express = require('express');
 const Razorpay = require('razorpay');
-const { Payment, Subscription } = require('../models');
+const { Payment, Subscription, Organization } = require('../models');
 const { validatePaymentVerification } = require('../middleware/validation');
 const { requireAdmin } = require('../middleware/auth');
+const { authenticateToken, requireSuperadmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -171,6 +172,37 @@ router.post('/verify', validatePaymentVerification, async (req, res) => {
     res.status(500).json({
       error: 'Failed to verify payment',
       message: details && details.description ? details.description : 'Internal server error'
+    });
+  }
+});
+
+//get all payments with name of organization (superadmin)
+router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const payments = await Payment.findAll({
+      include: [
+        {
+          model: Subscription,
+          as: 'subscription',
+          include: [
+            {
+              model: Organization,
+              as: 'organization',
+              attributes: ['name']
+            }
+          ]
+        }
+      ]
+    });
+    res.json({
+      success: true,
+      data: payments
+    });
+  } catch (error) {
+    console.error('Get payments error:', error);
+    res.status(500).json({
+      error: 'Failed to get payments',
+      message: 'Internal server error'
     });
   }
 });
