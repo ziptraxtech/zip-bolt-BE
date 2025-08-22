@@ -109,7 +109,11 @@ router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res)
 //get my assigned jobs
 router.get('/my-jobs', authenticateToken, async (req, res) => {
   try {
-    const jobs = await Job.findByAllocator(req.user.id);
+    const jobs = await Job.findAll({
+      where: {
+        riderId: req.user.id
+      }
+    });
     res.json({
       success: true,
       data: jobs
