@@ -1366,6 +1366,36 @@
         }
       }
     },
+    "/api/v1/jobs/my-jobs": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get my assigned jobs",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Job"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/jobs/{id}/status": {
       "put": {
         "tags": ["Jobs"],

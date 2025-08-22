@@ -67,8 +67,9 @@ router.put('/:id/status', authenticateToken, validateId, validateJobStatusUpdate
       });
     }
 
-    const { status } = req.body;
-    await job.update({ status });
+    // const { status } = req.body;
+    const {riderId, vehicleId, status} = req.body;
+    await job.update({ riderId, vehicleId, status });
 
     // Create job log
     await JobLog.createLog(job.id, req.user.id, 'status_updated', `Job status updated to ${status}`);
@@ -91,6 +92,23 @@ router.put('/:id/status', authenticateToken, validateId, validateJobStatusUpdate
 router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res) => {
   try {
     const jobs = await Job.findAll();
+    res.json({
+      success: true,
+      data: jobs
+    });
+  } catch (error) {
+    console.error('Get jobs error:', error);
+    res.status(500).json({
+      error: 'Failed to get jobs',
+      message: 'Internal server error'
+    });
+  }
+});
+
+//get my assigned jobs
+router.get('/my-jobs', authenticateToken, async (req, res) => {
+  try {
+    const jobs = await Job.findByAllocator(req.user.id);
     res.json({
       success: true,
       data: jobs

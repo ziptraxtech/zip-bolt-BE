@@ -200,7 +200,7 @@ const validateJobCreation = [
  */
 const validateJobStatusUpdate = [
   body('status')
-    .isIn(['assigned', 'accepted', 'in_progress', 'completed', 'cancelled'])
+    .isIn(['yet to be assigned','assigned','accepted','in_progress','completed','cancelled'])
     .withMessage('Invalid job status'),
   handleValidationErrors
 ];
@@ -280,7 +280,7 @@ const validatePagination = [
  */
 const validateId = [
   param('id')
-    .isInt({ min: 1 })
+    .isUUID()
     .withMessage('Please provide a valid ID'),
   handleValidationErrors
 ];
