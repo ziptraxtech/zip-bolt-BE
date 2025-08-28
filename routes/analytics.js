@@ -1,6 +1,6 @@
 const express = require('express');
 const { User, Organization, Vehicle, Job, Subscription, Payment } = require('../models');
-const { requireSuperadmin, requireAdmin } = require('../middleware/auth');
+const { requireSuperadmin, requireAdmin, requireAllocator } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -112,8 +112,70 @@ router.get('/admin', requireAdmin, async (req, res) => {
         subscription: activeSubscription
       }
     });
+    
   } catch (error) {
     console.error('Admin analytics error:', error);
+    res.status(500).json({
+      error: 'Failed to get analytics',
+      message: 'Internal server error'
+    });
+  }
+});
+
+// Alloactor analytics dashboard
+router.get('/allocator', requireAllocator, async (req, res) => {
+  try {
+    const organizationId = req.user.organizationId;
+
+    // Get riders-specific counts
+    const riders = await User.findAll({ where: { role: 'rider' } });
+
+    // Get totalVehicles breakdown
+    const totalVehicles = await Vehicle.count({
+      where: { organizationId }
+    });
+
+    // Get totalJobs breakdown
+    const totalJobs = await Job.count({
+      where: { organizationId }
+    });
+
+    // Get job status breakdown
+    const jobStatuses = await Job.findAll({
+      where: { organizationId },
+      attributes: ['status'],
+      raw: true
+    });
+
+    const statusCounts = jobStatuses.reduce((acc, job) => {
+      acc[job.status] = (acc[job.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Get recent jobs
+    const recentJobs = await Job.findAll({
+      where: { organizationId },
+      limit: 10,
+      order: [['createdAt', 'DESC']],
+      include: ['allocator', 'rider', 'vehicle']
+    });
+
+    res.json({
+      success: true,
+      data: {
+        riders: {
+          total: riders.length,
+          active: riders.filter(rider => rider.isActive).length
+        },
+        totalVehicles,
+        totalJobs,
+        jobStatuses: statusCounts,
+        recentJobs
+      }
+    });
+
+  } catch (error) {
+    console.error('alloactor analytics error:', error);
     res.status(500).json({
       error: 'Failed to get analytics',
       message: 'Internal server error'

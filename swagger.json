@@ -1577,6 +1577,19 @@
           }
         }
       }
+    },
+    "/api/v1/analytics/allocator": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Allocator dashboard",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Allocator analytics data"
+          }
+        }
+      }
+     } 
     }
   }
-} 
+ 
