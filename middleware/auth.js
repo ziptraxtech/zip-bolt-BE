@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const { Payment, Subscription } = require('../models');
 
 /**
  * Middleware to authenticate JWT token
@@ -200,6 +201,78 @@ const requireResourceAccess = (resourceType) => {
   };
 };
 
+/**
+ * Middleware to check if organization has a valid payment
+ */
+const requireValidPayment = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.organizationId) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'User authentication required',
+      });
+    }
+
+    // Find subscription of this organization
+    const subscription = await Subscription.findOne({
+      where: { organizationId: req.user.organizationId },
+    });
+
+    if (!subscription) {
+      return res.status(403).json({
+        error: 'No Subscription',
+        message: 'Your organization does not have any active subscription',
+      });
+    }
+
+    // Find latest payment for that subscription
+    const payment = await Payment.findOne({
+      where: { subscriptionId: subscription.id },
+      order: [['createdAt', 'DESC']], // latest payment
+    });
+
+    if (!payment) {
+      return res.status(403).json({
+        error: 'No Payment Found',
+        message: 'Please make a payment to continue',
+      });
+    }
+
+    switch (payment.status) {
+      case 'pending':
+        return res.status(402).json({
+          error: 'Payment Pending',
+          message: 'Your payment is pending. Please complete the payment.',
+        });
+      case 'failed':
+        return res.status(402).json({
+          error: 'Payment Failed',
+          message: 'Your last payment attempt failed. Please retry.',
+        });
+      case 'refunded':
+        return res.status(403).json({
+          error: 'Payment Refunded',
+          message: 'Your payment was refunded. Please purchase again.',
+        });
+      case 'completed':
+        return next(); // ✅ Allow if successful
+      default:
+        return res.status(500).json({
+          error: 'Unknown Status',
+          message: 'Unexpected payment status. Contact support.',
+        });
+    }
+  } catch (error) {
+    console.error('Payment middleware error:', error);
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Something went wrong while checking payment status',
+    });
+  }
+};
+
+
+
 module.exports = {
   authenticateToken,
   requireRole,
@@ -208,5 +281,6 @@ module.exports = {
   requireAllocator,
   requireRider,
   requireOrganizationAccess,
-  requireResourceAccess
-}; 
+  requireResourceAccess,
+  requireValidPayment
+  }; 
