@@ -156,14 +156,49 @@ const validateJobCreation = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage('Description must not exceed 2000 characters'),
-  body('pickupLocation')
+
+  // Pickup details (mandatory)
+  body('pickupAddress')
     .trim()
     .notEmpty()
-    .withMessage('Pickup location is required'),
-  body('deliveryLocation')
+    .withMessage('Pickup address is required'),
+  body('pickupCity')
     .trim()
     .notEmpty()
-    .withMessage('Delivery location is required'),
+    .withMessage('Pickup city is required'),
+  body('pickupState')
+    .trim()
+    .notEmpty()
+    .withMessage('Pickup state is required'),
+  body('pickupPin')
+    .trim()
+    .notEmpty()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Pickup pin must be exactly 6 digits')
+    .matches(/^\d{6}$/)
+    .withMessage('Pickup pin must contain only numbers'),
+
+  // Delivery details (mandatory)
+  body('deliveryAddress')
+    .trim()
+    .notEmpty()
+    .withMessage('Delivery address is required'),
+  body('deliveryCity')
+    .trim()
+    .notEmpty()
+    .withMessage('Delivery city is required'),
+  body('deliveryState')
+    .trim()
+    .notEmpty()
+    .withMessage('Delivery state is required'),
+  body('deliveryPin')
+    .trim()
+    .notEmpty()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Delivery pin must be exactly 6 digits')
+    .matches(/^\d{6}$/)
+    .withMessage('Delivery pin must contain only numbers'),
+
   body('pickupLatitude')
     .optional()
     .isFloat({ min: -90, max: 90 })
@@ -180,17 +215,17 @@ const validateJobCreation = [
     .optional()
     .isFloat({ min: -180, max: 180 })
     .withMessage('Delivery longitude must be between -180 and 180'),
-  body('scheduledTime')
+  body('scheduleTime')
     .optional()
     .isISO8601()
     .withMessage('Please provide a valid date and time'),
   body('riderId')
     .optional()
-    .isInt({ min: 1 })
+    .isUUID()
     .withMessage('Please provide a valid rider ID'),
   body('vehicleId')
     .optional()
-    .isInt({ min: 1 })
+    .isUUID()
     .withMessage('Please provide a valid vehicle ID'),
   handleValidationErrors
 ];
@@ -314,4 +349,4 @@ module.exports = {
   validateId,
   validateDateRange,
   validateSubscriptionPlanCreation
-}; 
+};
