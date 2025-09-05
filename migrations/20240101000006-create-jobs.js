@@ -57,13 +57,27 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true
       },
+
+      // --- Pickup details ---
       pickup_location: {
         type: Sequelize.TEXT,
         allowNull: false
       },
-      delivery_location: {
-        type: Sequelize.TEXT,
-        allowNull: false
+      pickup_address: {
+        type: Sequelize.STRING(255),
+        allowNull: false   
+      },
+      pickup_city: {
+        type: Sequelize.STRING(100),
+        allowNull: false   
+      },
+      pickup_state: {
+        type: Sequelize.STRING(100),
+        allowNull: false   
+      },
+      pickup_pincode: {
+        type: Sequelize.STRING(20),
+        allowNull: false   
       },
       pickup_latitude: {
         type: Sequelize.DECIMAL(10, 8),
@@ -73,6 +87,28 @@ module.exports = {
         type: Sequelize.DECIMAL(11, 8),
         allowNull: true
       },
+
+      // --- Delivery details ---
+      delivery_location: {
+        type: Sequelize.TEXT,
+        allowNull: false
+      },
+      delivery_address: {
+        type: Sequelize.STRING(255),
+        allowNull: false   
+      },
+      delivery_city: {
+        type: Sequelize.STRING(100),
+        allowNull: false   
+      },
+      delivery_state: {
+        type: Sequelize.STRING(100),
+        allowNull: false   
+      },
+      delivery_pincode: {
+        type: Sequelize.STRING(20),
+        allowNull: false   
+      },
       delivery_latitude: {
         type: Sequelize.DECIMAL(10, 8),
         allowNull: true
@@ -81,6 +117,7 @@ module.exports = {
         type: Sequelize.DECIMAL(11, 8),
         allowNull: true
       },
+
       scheduled_time: {
         type: Sequelize.DATE,
         allowNull: true
@@ -124,4 +161,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('jobs');
   }
-}; 
+};
