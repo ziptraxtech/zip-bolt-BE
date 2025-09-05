@@ -1,5 +1,4 @@
-const { DataTypes } = require('sequelize');
-const { v4: uuidv4 } = require('uuid');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
 
 /**
@@ -43,46 +42,68 @@ const sequelize = require('../config/database');
  *           description: Detailed job description
  *         pickupLocation:
  *           type: string
- *           description: Pickup location address
+ *           description: Pickup location (auto-generated from address fields)
+ *         pickupAddress:
+ *           type: string
+ *           description: Full pickup street address
+ *           required: true
+ *         pickupCity:
+ *           type: string
+ *           required: true
+ *         pickupState:
+ *           type: string
+ *           required: true
+ *         pickupPin:
+ *           type: string
+ *           pattern: '^[0-9]{6}$'
+ *           description: 6-digit numeric pin code
+ *           required: true
  *         deliveryLocation:
  *           type: string
- *           description: Delivery location address
+ *           description: Delivery location (auto-generated from address fields)
+ *         deliveryAddress:
+ *           type: string
+ *           description: Full delivery street address
+ *           required: true
+ *         deliveryCity:
+ *           type: string
+ *           required: true
+ *         deliveryState:
+ *           type: string
+ *           required: true
+ *         deliveryPin:
+ *           type: string
+ *           pattern: '^[0-9]{6}$'
+ *           description: 6-digit numeric pin code
+ *           required: true
  *         pickupLatitude:
  *           type: number
  *           format: float
- *           description: Pickup location latitude
  *         pickupLongitude:
  *           type: number
  *           format: float
- *           description: Pickup location longitude
  *         deliveryLatitude:
  *           type: number
  *           format: float
- *           description: Delivery location latitude
  *         deliveryLongitude:
  *           type: number
  *           format: float
- *           description: Delivery location longitude
- *         scheduledTime:
+ *         scheduleTime:
  *           type: string
  *           format: date-time
- *           description: Scheduled job time
+ *           description: Scheduled date and time for the job
  *         status:
  *           type: string
- *           enum: [assigned, accepted, in_progress, completed, cancelled]
- *           description: Current job status
+ *           enum: [yet to be assigned, assigned, accepted, in_progress, completed, cancelled]
  *         assignedAt:
  *           type: string
  *           format: date-time
- *           description: When the job was assigned
  *         startedAt:
  *           type: string
  *           format: date-time
- *           description: When the job was started
  *         completedAt:
  *           type: string
  *           format: date-time
- *           description: When the job was completed
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -98,36 +119,24 @@ const Job = sequelize.define('Job', {
     defaultValue: DataTypes.UUIDV4
   },
   organizationId: {
-    type: DataTypes.UUIDV4,
+    type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'organizations',
-      key: 'id'
-    }
+    references: { model: 'organizations', key: 'id' }
   },
   allocatorId: {
-    type: DataTypes.UUIDV4,
+    type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'users',
-      key: 'id'
-    }
+    references: { model: 'users', key: 'id' }
   },
   riderId: {
-    type: DataTypes.UUIDV4,
+    type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'users',
-      key: 'id'
-    }
+    references: { model: 'users', key: 'id' }
   },
   vehicleId: {
-    type: DataTypes.UUIDV4,
+    type: DataTypes.UUID,
     allowNull: true,
-    references: {
-      model: 'vehicles',
-      key: 'id'
-    }
+    references: { model: 'vehicles', key: 'id' }
   },
   title: {
     type: DataTypes.STRING(255),
@@ -137,73 +146,50 @@ const Job = sequelize.define('Job', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  pickupLocation: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  deliveryLocation: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
-  pickupLatitude: {
-    type: DataTypes.DECIMAL(10, 8),
-    allowNull: true
-  },
-  pickupLongitude: {
-    type: DataTypes.DECIMAL(11, 8),
-    allowNull: true
-  },
-  deliveryLatitude: {
-    type: DataTypes.DECIMAL(10, 8),
-    allowNull: true
-  },
-  deliveryLongitude: {
-    type: DataTypes.DECIMAL(11, 8),
-    allowNull: true
-  },
-  scheduledTime: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
+
+  pickupLocation: { type: DataTypes.TEXT, allowNull: false },
+  pickupAddress: { type: DataTypes.STRING(255), allowNull: false },
+  pickupCity: { type: DataTypes.STRING(100), allowNull: false },
+  pickupState: { type: DataTypes.STRING(100), allowNull: false },
+  pickupPincode: { type: DataTypes.STRING(20), allowNull: false },
+  pickupLatitude: { type: DataTypes.DECIMAL(10, 8), allowNull: true },
+  pickupLongitude: { type: DataTypes.DECIMAL(11, 8), allowNull: true },
+
+  deliveryLocation: { type: DataTypes.TEXT, allowNull: false },
+  deliveryAddress: { type: DataTypes.STRING(255), allowNull: false },
+  deliveryCity: { type: DataTypes.STRING(100), allowNull: false },
+  deliveryState: { type: DataTypes.STRING(100), allowNull: false },
+  deliveryPincode: { type: DataTypes.STRING(20), allowNull: false },
+  deliveryLatitude: { type: DataTypes.DECIMAL(10, 8), allowNull: true },
+  deliveryLongitude: { type: DataTypes.DECIMAL(11, 8), allowNull: true },
+
+  scheduledTime: { type: DataTypes.DATE, allowNull: true },
   status: {
-    type: DataTypes.ENUM('yet to be assigned','assigned','accepted','in_progress','completed','cancelled'),
+    type: DataTypes.ENUM(
+      'yet to be assigned',
+      'assigned',
+      'accepted',
+      'in_progress',
+      'completed',
+      'cancelled'
+    ),
     defaultValue: 'yet to be assigned'
   },
-  assignedAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  startedAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  completedAt: {
-    type: DataTypes.DATE,
-    allowNull: true
-  }
+  assignedAt: { type: DataTypes.DATE, allowNull: true },
+  startedAt: { type: DataTypes.DATE, allowNull: true },
+  completedAt: { type: DataTypes.DATE, allowNull: true }
 }, {
   tableName: 'jobs',
   timestamps: true,
   indexes: [
-    {
-      fields: ['organizationId']
-    },
-    {
-      fields: ['status']
-    },
-    {
-      fields: ['riderId']
-    },
-    {
-      fields: ['allocatorId']
-    },
-    {
-      fields: ['scheduledTime']
-    }
+    { fields: ['organizationId'] },
+    { fields: ['status'] },
+    { fields: ['riderId'] },
+    { fields: ['allocatorId'] },
+    { fields: ['scheduledTime'] }
   ]
 });
 
-// Instance methods
 Job.prototype.canBeAccepted = function() {
   return this.status === 'assigned';
 };
@@ -225,7 +211,6 @@ Job.prototype.getDuration = function() {
   return new Date(this.completedAt) - new Date(this.startedAt);
 };
 
-// Class methods
 Job.findByOrganization = function(organizationId) {
   return this.findAll({ 
     where: { organizationId },
@@ -252,9 +237,7 @@ Job.findByStatus = function(status, organizationId = null) {
 
 Job.findPending = function(organizationId = null) {
   const where = {
-    status: {
-      [sequelize.Op.in]: ['assigned', 'accepted']
-    }
+    status: { [Op.in]: ['assigned', 'accepted'] }
   };
   if (organizationId) where.organizationId = organizationId;
   
@@ -264,4 +247,4 @@ Job.findPending = function(organizationId = null) {
   });
 };
 
-module.exports = Job; 
+module.exports = Job;
