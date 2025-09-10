@@ -37,4 +37,47 @@ router.post("/", (req, res, next) => {
   }
 });
 
+// PUT /chargers/:id (Allocator, Admin, Superadmin)
+router.put("/:id", (req, res, next) => {
+  if (req.user.role === "allocator" || req.user.role === "admin" || req.user.role === "superadmin") {
+    return next();
+  }
+  return res.status(403).json({error: "Access denied",message: "Only allocator, admin, or superadmin can update chargers",});
+}, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await Charger.update(req.body, { where: { id } });
+
+    if (updated) {
+      const updatedCharger = await Charger.findByPk(id);
+      return res.json({success: true,message: "Charger updated successfully",data: updatedCharger,});
+    }
+    return res.status(404).json({ error: "Charger not found" });
+  } catch (error) {
+    console.error("Update charger error:", error);
+    res.status(500).json({error: "Failed to update charger",message: "Internal server error",});
+  }
+});
+
+// DELETE /chargers/:id (Allocator, Admin, Superadmin)
+router.delete("/:id", (req, res, next) => {
+  if (["allocator", "admin", "superadmin"].includes(req.user.role)) {
+    return next();
+  }
+  return res.status(403).json({error: "Access denied",message: "Only allocator, admin, or superadmin can delete chargers",});
+}, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Charger.destroy({ where: { id } });
+
+    if (deleted) {
+      return res.json({ success: true, message: "Charger deleted successfully" });
+    }
+    return res.status(404).json({ error: "Charger not found" });
+  } catch (error) {
+    console.error("Delete charger error:", error);
+    res.status(500).json({error: "Failed to delete charger",message: "Internal server error",});
+  }
+});
+
 module.exports = router;

@@ -1592,15 +1592,9 @@
      },
     "/api/v1/chargers": {
       "get": {
-        "tags": [
-          "Chargers"
-        ],
+        "tags": ["Chargers"],
         "summary": "Get all chargers",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "description": "Fetch all chargers (only accessible to Riders).",
         "operationId": "getChargers",
         "responses": {
@@ -1631,15 +1625,9 @@
         }
       },
       "post": {
-        "tags": [
-          "Chargers"
-        ],
+        "tags": ["Chargers"],
         "summary": "Create a new charger",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "description": "Create a charger (Allocator, Admin, Superadmin only).",
         "operationId": "createCharger",
         "requestBody": {
@@ -1700,6 +1688,133 @@
           },
           "500": {
             "description": "Internal server error"
+            }
+          }
+        }
+      },
+    "/api/v1/chargers/{id}": {
+  "put": {
+    "tags": ["Chargers"],
+    "summary": "Update a charger",
+    "security": [{"bearerAuth": []}],
+    "description": "Update an existing charger (Allocator, Admin, Superadmin only).",
+    "operationId": "updateCharger",
+    "parameters": [ 
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "ID of the charger to update"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "float"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "float"
+              },
+              "address": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["active","inactive","under_maintenance"]
+              },
+              "charger-type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Charger updated successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/Charger"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Charger not found"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  },
+  
+  "delete": {
+    "tags": ["Chargers"],
+    "summary": "Delete a charger",
+    "security": [{"bearerAuth": []}],
+    "description": "Delete a charger (Allocator, Admin, Superadmin only).",
+    "operationId": "deleteCharger",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "ID of the charger to delete"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Charger deleted successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Charger not found"
+      },
+      "500": {
+        "description": "Internal server error"
             }
           }
         }
