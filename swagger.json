@@ -1692,6 +1692,7 @@
           }
         }
       },
+
     "/api/v1/chargers/{id}": {
   "put": {
     "tags": ["Chargers"],
@@ -1812,6 +1813,83 @@
       },
       "404": {
         "description": "Charger not found"
+      },
+      "500": {
+        "description": "Internal server error"
+            }
+          }
+        }
+      },
+
+"/api/v1/chargers/nearby": {
+  "post": {
+    "tags": ["Chargers"],
+    "summary": "Get chargers sorted by distance",
+    "description": "Returns all chargers sorted from nearest to farthest based on the provided latitude and longitude. Accessible by all roles.",
+    "security": [{ "bearerAuth": [] }],
+    "operationId": "getChargersByDistance",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["currentLatitude", "currentLongitude"],
+            "properties": {
+              "currentLatitude": {
+                "type": "number",
+                "format": "float",
+                "example": 12.9716
+              },
+              "currentLongitude": {
+                "type": "number",
+                "format": "float",
+                "example": 77.5946
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Chargers sorted by distance",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Chargers sorted by distance" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      { "$ref": "#/components/schemas/Charger" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 1.25,
+                            "description": "Distance in kilometers from the provided location"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Missing required fields"
+      },
+      "404": {
+        "description": "No chargers available"
       },
       "500": {
         "description": "Internal server error"

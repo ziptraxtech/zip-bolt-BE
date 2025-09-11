@@ -80,4 +80,74 @@ router.delete("/:id", (req, res, next) => {
   }
 });
 
+// Utility: Haversine formula to calculate distance (km)
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+ 
+router.post("/nearby", (req, res, next) => {
+  if (["rider", "allocator", "admin", "superadmin"].includes(req.user.role)) {
+    return next();
+  }
+  return res.status(403).json({
+    error: "Access denied",
+    message: "Only rider, allocator, admin, or superadmin can access this API",
+  });
+}, async (req, res) => {
+  try {
+    const { currentLatitude, currentLongitude } = req.body;
+
+    if (!currentLatitude || !currentLongitude) {
+      return res.status(400).json({
+        error: "Missing required fields",
+        message: "Please provide currentLatitude and currentLongitude",
+      });
+    }
+
+    const chargers = await Charger.findAll();
+
+    if (chargers.length === 0) {
+      return res.status(404).json({ error: "No chargers available" });
+    }
+
+    const chargersWithDistance = chargers.map((charger) => {
+      const distance = getDistanceFromLatLonInKm(
+        currentLatitude,
+        currentLongitude,
+        charger.latitude,
+        charger.longitude
+      );
+      return {
+        ...charger.toJSON(),
+        distance: parseFloat(distance.toFixed(2))
+      };
+    });
+
+    chargersWithDistance.sort((a, b) => a.distance - b.distance);
+
+    res.json({
+      success: true,
+      message: "Chargers sorted by distance",
+      data: chargersWithDistance
+    });
+  } catch (error) {
+    console.error("Nearby charger error:", error);
+    res.status(500).json({
+      error: "Failed to fetch nearby chargers",
+      message: "Internal server error",
+    });
+  }
+});
+
 module.exports = router;
