@@ -34,7 +34,7 @@ const sequelize = require("../config/database");
  *           description: Charger status
  *         charger_type:
  *           type: string
- *           description: Charger type (e.g., fast, slow, DC, AC)
+ *           description: Charger type (e.g., fast, slow, DC, ,AC, Normal)
  *         createdAt:
  *           type: string
  *           format: date-time
