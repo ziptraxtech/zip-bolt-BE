@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const { Job, JobLog } = require('../models');
+const { Job, JobLog, User, Organization } = require('../models');
 const { validateJobStatusUpdate, validateId, validateJobCreation } = require('../middleware/validation');
 const { authenticateToken, requireAllocator, requireSuperadmin } = require('../middleware/auth');
 
@@ -144,6 +144,113 @@ router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res)
   } catch (error) {
     console.error('Get jobs error:', error);
     res.status(500).json({ error: 'Failed to get jobs', message: 'Internal server error' });
+  }
+});
+
+// get all jobs super admin in csv
+
+router.get('/superadmin/csv', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const jobs = await Job.findAll({
+      include: [
+        {
+          model: Organization,
+          as: 'organization',
+          attributes: ['name']
+        },
+        {
+          model: User,
+          as: 'allocator',
+          attributes: ['firstName', 'lastName', 'email']
+        },
+        {
+          model: User,
+          as: 'rider',
+          attributes: ['firstName', 'lastName', 'email']
+        }
+      ]
+    });
+
+    const csvHeaders = [
+      'Title',
+      'Description',
+      'Status',
+      'Organization Name',
+      'Allocator Name',
+      'Allocator Email',
+      'Rider Name',
+      'Rider Email',
+      'Pickup Location',
+      'Delivery Location',
+      'Pickup Coordinates',
+      'Delivery Coordinates',
+      'Scheduled Time',
+      'Assigned At',
+      'Started At',
+      'Completed At',
+      'Created At',
+      'Updated At'
+    ];
+
+    const csvRows = jobs.map(job => {
+      const jobData = job.toJSON();
+      const allocatorName = jobData.allocator ? 
+        `${jobData.allocator.firstName || ''} ${jobData.allocator.lastName || ''}`.trim() : '';
+      const riderName = jobData.rider ? 
+        `${jobData.rider.firstName || ''} ${jobData.rider.lastName || ''}`.trim() : '';
+      const pickupCoords = jobData.pickupLatitude && jobData.pickupLongitude ? 
+        `${jobData.pickupLatitude}, ${jobData.pickupLongitude}` : '';
+      const deliveryCoords = jobData.deliveryLatitude && jobData.deliveryLongitude ? 
+        `${jobData.deliveryLatitude}, ${jobData.deliveryLongitude}` : '';
+
+      return [
+        jobData.title || '',
+        jobData.description || '',
+        jobData.status || '',
+        jobData.organization?.name || '',
+        allocatorName,
+        jobData.allocator?.email || '',
+        riderName,
+        jobData.rider?.email || '',
+        jobData.pickupLocation || '',
+        jobData.deliveryLocation || '',
+        pickupCoords,
+        deliveryCoords,
+        jobData.scheduledTime ? new Date(jobData.scheduledTime).toISOString() : '',
+        jobData.assignedAt ? new Date(jobData.assignedAt).toISOString() : '',
+        jobData.startedAt ? new Date(jobData.startedAt).toISOString() : '',
+        jobData.completedAt ? new Date(jobData.completedAt).toISOString() : '',
+        jobData.createdAt ? new Date(jobData.createdAt).toISOString() : '',
+        jobData.updatedAt ? new Date(jobData.updatedAt).toISOString() : ''
+      ];
+    });
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => 
+        row.map(field => {
+          if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
+            return `"${field.replace(/"/g, '""')}"`;
+          }
+          return field;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const filename = `jobs-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Pragma', 'no-cache');
+
+    res.status(200).send(csvContent);
+
+  } catch (error) {
+    console.error('CSV export error:', error);
+    res.status(500).json({
+      error: 'Failed to export jobs to CSV',
+      message: 'Internal server error'
+    });
   }
 });
 

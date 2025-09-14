@@ -1404,6 +1404,18 @@
         }
       }
     },
+    "/api/v1/jobs/superadmin/csv":{
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get all jobs in CSV format (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of jobs in CSV format"
+          }
+        }
+      }
+    },
     "/api/v1/jobs/my-jobs": {
       "get": {
         "tags": ["Jobs"],
