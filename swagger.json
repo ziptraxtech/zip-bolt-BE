@@ -1592,6 +1592,18 @@
         }
       }
     },
+    "/api/v1/payments/superadmin/csv":{
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get payments in CSV format (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of payments in CSV format"
+          }
+        }
+      }
+    },
     "/api/v1/analytics/superadmin": {
       "get": {
         "tags": ["Analytics"],
