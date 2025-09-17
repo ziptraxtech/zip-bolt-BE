@@ -118,7 +118,6 @@ router.get('/', requireAllocator, validatePagination, async (req, res) => {
 });
 
 //get all users in csv
-
 router.get('/csv', requireAllocator, async (req, res) => {
   try {
     const where = {};
@@ -405,16 +404,15 @@ router.get('/:id', requireResourceAccess('user'), async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.put('/:id', requireResourceAccess('user'), async (req, res) => {
+router.put('/:id', requireAdmin, requireResourceAccess('user'), async (req, res) => {
   try {
-    const { firstName, lastName, phone, role, isActive } = req.body;
+    const { firstName, lastName, phone, role, isActive, email } = req.body;
     const user = req.resource;
 
-    // Only superadmin can change roles
-    if (role && req.user.role !== 'superadmin') {
+    if (role && req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'Only superadmin can change user roles'
+        message: 'Only superadmin and admin can change user roles'
       });
     }
 
@@ -423,6 +421,7 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
       phone: phone !== undefined ? phone : user.phone,
+      email: email || user.email,
       role: role || user.role,
       isActive: isActive !== undefined ? isActive : user.isActive
     });
@@ -576,4 +575,4 @@ router.get('/organization/:organizationId', requireAllocator, async (req, res) =
   }
 });
 
-module.exports = router; 
+module.exports = router;
