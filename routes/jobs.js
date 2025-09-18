@@ -112,6 +112,90 @@ router.post('/', requireAllocator, validateJobCreation, async (req, res) => {
   }
 });
 
+router.put('/:id', authenticateToken, requireAllocator, validateId, async (req, res) => {
+  try {
+    const job = await Job.findByPk(req.params.id);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found', message: 'The specified job does not exist' });
+    }
+
+    if (job.organizationId !== req.user.organizationId) {
+      return res.status(403).json({ error: 'Access denied', message: 'You can only update jobs from your organization' });
+    }
+
+    const updatableFields = [
+      'title',
+      'description',
+      'scheduledTime',
+      'vehicleId',
+      'riderId',
+      'pickupAddress',
+      'pickupCity',
+      'pickupState',
+      'pickupPincode',
+      'pickupLatitude',
+      'pickupLongitude',
+      'deliveryAddress',
+      'deliveryCity',
+      'deliveryState',
+      'deliveryPincode',
+      'deliveryLatitude',
+      'deliveryLongitude'
+    ];
+
+    const updates = {};
+    updatableFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    // Auto-generate pickup/delivery location strings if updated
+    if (
+      updates.pickupAddress || updates.pickupCity || updates.pickupState || updates.pickupPincode
+    ) {
+      updates.pickupLocation = `${updates.pickupAddress || job.pickupAddress}, ${updates.pickupCity || job.pickupCity}, ${updates.pickupState || job.pickupState} - ${updates.pickupPincode || job.pickupPincode}`;
+    }
+
+    if (
+      updates.deliveryAddress || updates.deliveryCity || updates.deliveryState || updates.deliveryPincode
+    ) {
+      updates.deliveryLocation = `${updates.deliveryAddress || job.deliveryAddress}, ${updates.deliveryCity || job.deliveryCity}, ${updates.deliveryState || job.deliveryState} - ${updates.deliveryPincode || job.deliveryPincode}`;
+    }
+
+    await job.update(updates);
+
+    await JobLog.createLog(job.id, req.user.id, 'updated', 'Job updated');
+
+    res.json({ success: true, message: 'Job updated successfully', data: job });
+  } catch (error) {
+    console.error('Update job error:', error);
+    res.status(500).json({ error: 'Failed to update job', message: 'Internal server error' });
+  }
+});
+
+// ✅ Delete job
+router.delete('/:id', authenticateToken, requireAllocator, validateId, async (req, res) => {
+  try {
+    const job = await Job.findByPk(req.params.id);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found', message: 'The specified job does not exist' });
+    }
+
+    if (job.organizationId !== req.user.organizationId) {
+      return res.status(403).json({ error: 'Access denied', message: 'You can only delete jobs from your organization' });
+    }
+
+    await JobLog.createLog(job.id, req.user.id, 'deleted', 'Job deleted');
+    await job.destroy();
+
+    res.json({ success: true, message: 'Job deleted successfully' });
+  } catch (error) {
+    console.error('Delete job error:', error);
+    res.status(500).json({ error: 'Failed to delete job', message: 'Internal server error' });
+  }
+});
+
 // Update job status (assign rider & vehicle)
 router.put('/:id/status', authenticateToken, validateId, async (req, res) => {
   try {

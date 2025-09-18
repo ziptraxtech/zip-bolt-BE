@@ -1673,6 +1673,63 @@
         }
       }
     },
+    "/api/v1/jobs/{id}": {
+  "put": {
+    "summary": "Update a job",
+    "tags": ["Jobs"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Job ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "riderId": { "type": "string", "format": "uuid" },
+              "vehicleId": { "type": "string", "format": "uuid" },
+              "scheduledTime": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Job updated successfully" },
+      "404": { "description": "Job not found" },
+      "403": { "description": "Access denied" }
+    }
+  },
+  "delete": {
+    "summary": "Delete a job",
+    "tags": ["Jobs"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Job ID"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Job deleted successfully" },
+      "404": { "description": "Job not found" },
+      "403": { "description": "Access denied" }
+    }
+  }
+},
     "/api/v1/payments/create-order": {
       "post": {
         "tags": ["Payments"],
