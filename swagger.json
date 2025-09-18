@@ -989,6 +989,137 @@
         }
       }
     },
+    "/api/v1/organizations/{id}": {
+  "put": {
+    "tags": ["Organizations"],
+    "summary": "Update organization (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Organization ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "gstNumber": {
+                "type": "string"
+              },
+              "isActive": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Organization updated successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Access denied"
+      },
+      "404": {
+        "description": "Organization not found"
+      }
+    }
+  },
+  "delete": {
+    "tags": ["Organizations"],
+    "summary": "Delete organization (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Organization ID"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Organization deleted successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Access denied"
+      },
+      "404": {
+        "description": "Organization not found"
+      }
+    }
+  }
+},
     "/api/v1/subscriptions/plans": {
       "get": {
         "tags": ["Subscriptions"],

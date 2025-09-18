@@ -40,7 +40,6 @@ router.get('/', requireSuperadmin, async (req, res) => {
 
 
 //get all organizations in csv
-
 router.get('/csv', requireSuperadmin, async (req, res) => {
   try {
     const organizations = await Organization.findAll({
@@ -178,7 +177,8 @@ router.post('/', validateOrganizationCreation, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Organization ID
  *     responses:
  *       200:
@@ -214,7 +214,7 @@ router.get('/:id', validateId, async (req, res) => {
  * @swagger
  * /organizations/{id}:
  *   put:
- *     summary: Update organization
+ *     summary: Update organization (Superadmin only)
  *     tags: [Organizations]
  *     security:
  *       - bearerAuth: []
@@ -223,7 +223,8 @@ router.get('/:id', validateId, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Organization ID
  *     requestBody:
  *       required: true
@@ -257,7 +258,7 @@ router.get('/:id', validateId, async (req, res) => {
  *       404:
  *         description: Organization not found
  */
-router.put('/:id', validateId, async (req, res) => {
+router.put('/:id', requireSuperadmin, validateId, async (req, res) => {
   try {
     const organization = await Organization.findByPk(req.params.id);
     
@@ -284,4 +285,52 @@ router.put('/:id', validateId, async (req, res) => {
   }
 });
 
-module.exports = router; 
+/**
+ * @swagger
+ * /organizations/{id}:
+ *   delete:
+ *     summary: Delete organization (Superadmin only)
+ *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Organization ID
+ *     responses:
+ *       200:
+ *         description: Organization deleted successfully
+ *       404:
+ *         description: Organization not found
+ */
+router.delete('/:id', requireSuperadmin, validateId, async (req, res) => {
+  try {
+    const organization = await Organization.findByPk(req.params.id);
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found',
+        message: 'The specified organization does not exist'
+      });
+    }
+
+    await organization.destroy();
+
+    res.json({
+      success: true,
+      message: 'Organization deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete organization error:', error);
+    res.status(500).json({
+      error: 'Failed to delete organization',
+      message: 'Internal server error'
+    });
+  }
+});
+
+module.exports = router;
