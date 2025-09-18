@@ -1421,6 +1421,61 @@
         }
       }
     },
+    "/api/v1/vehicles/{id}": {
+  "put": {
+    "summary": "Update a vehicle (Admin only)",
+    "tags": ["Vehicles"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Vehicle ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "plateNumber": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Vehicle updated successfully" },
+      "404": { "description": "Vehicle not found" },
+      "403": { "description": "Access denied" }
+    }
+  },
+  "delete": {
+    "summary": "Delete a vehicle (Admin only)",
+    "tags": ["Vehicles"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Vehicle ID"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Vehicle deleted successfully" },
+      "404": { "description": "Vehicle not found" },
+      "403": { "description": "Access denied" }
+    }
+  }
+},
     "/api/v1/jobs": {
       "get": {
         "tags": ["Jobs"],

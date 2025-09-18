@@ -60,4 +60,59 @@ router.get('/organization', requireAllocator, async (req, res) => {
   }
 });
 
+// ✅ Update vehicle
+router.put('/:id', requireAdmin, validateId, async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findByPk(req.params.id);
+
+    if (!vehicle || vehicle.organizationId !== req.user.organizationId) {
+      return res.status(404).json({
+        error: 'Vehicle not found',
+        message: 'The specified vehicle does not exist in your organization'
+      });
+    }
+
+    await vehicle.update(req.body);
+
+    res.json({
+      success: true,
+      message: 'Vehicle updated successfully',
+      data: vehicle
+    });
+  } catch (error) {
+    console.error('Update vehicle error:', error);
+    res.status(500).json({
+      error: 'Failed to update vehicle',
+      message: 'Internal server error'
+    });
+  }
+});
+
+// ✅ Delete vehicle
+router.delete('/:id', requireAdmin, validateId, async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findByPk(req.params.id);
+
+    if (!vehicle || vehicle.organizationId !== req.user.organizationId) {
+      return res.status(404).json({
+        error: 'Vehicle not found',
+        message: 'The specified vehicle does not exist in your organization'
+      });
+    }
+
+    await vehicle.destroy();
+
+    res.json({
+      success: true,
+      message: 'Vehicle deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete vehicle error:', error);
+    res.status(500).json({
+      error: 'Failed to delete vehicle',
+      message: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router; 
