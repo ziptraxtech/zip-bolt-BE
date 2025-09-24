@@ -958,8 +958,12 @@
 },
 "delete": {
   "tags": ["Users"],
-  "summary": "Delete user (Admin only)",
-  "security": [{"bearerAuth": []}],
+  "summary": "Permanently delete user (Admin only)",
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "parameters": [
     {
       "in": "path",
@@ -974,7 +978,7 @@
   ],
   "responses": {
     "200": {
-      "description": "User deleted successfully",
+      "description": "User deleted permanently",
       "content": {
         "application/json": {
           "schema": {
@@ -999,9 +1003,9 @@
     },
     "404": {
       "description": "User not found"
-         }
-       }
-     }
+          }
+        }
+      }
     },
     "/api/v1/organizations": {
       "get": {

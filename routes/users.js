@@ -444,7 +444,7 @@ router.put('/:id', requireAdmin, requireResourceAccess('user'), async (req, res)
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Delete user (Admin only)
+ *     summary: Permanently delete user (Admin only)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -457,7 +457,7 @@ router.put('/:id', requireAdmin, requireResourceAccess('user'), async (req, res)
  *         description: User ID
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         description: User deleted permanently
  *         content:
  *           application/json:
  *             schema:
@@ -484,12 +484,12 @@ router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, r
       });
     }
 
-    // Soft delete by deactivating
-    await user.update({ isActive: false });
+    // Hard delete (permanent)
+    await user.destroy();
 
     res.json({
       success: true,
-      message: 'User deactivated successfully'
+      message: 'User deleted permanently'
     });
   } catch (error) {
     console.error('Delete user error:', error);
@@ -499,6 +499,7 @@ router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, r
     });
   }
 });
+
 
 /**
  * @swagger
