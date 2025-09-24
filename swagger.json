@@ -64,6 +64,14 @@
             "format": "uuid",
             "description": "ID of the organization the user belongs to"
           },
+            "latitude": {
+              "type": "number",
+              "format": "float"
+          },
+            "longitude": {
+              "type": "number",
+              "format": "float"
+          },
           "isActive": {
             "type": "boolean",
             "description": "Whether the user account is active"
@@ -806,7 +814,15 @@
                   "role": {
                     "type": "string",
                     "enum": ["admin", "allocator", "rider"]
-                  }
+                  },
+            "latitude": {
+              "type": "number",
+              "format": "float"
+          },
+            "longitude": {
+              "type": "number",
+              "format": "float"
+          }
                 }
               }
             }

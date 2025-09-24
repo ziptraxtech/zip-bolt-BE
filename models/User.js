@@ -98,6 +98,14 @@ const User = sequelize.define('User', {
       key: 'id'
     }
   },
+  latitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
+      longitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: true,
+      },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
