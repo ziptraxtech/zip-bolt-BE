@@ -819,6 +819,25 @@
         }
       }
     },
+    "/api/v1/users/csv": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get users in CSV format",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Users in CSV format",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/users/{id}": {
       "get": {
         "tags": ["Users"],
@@ -855,7 +874,134 @@
             }
           }
         }
+      },
+"put": {
+  "tags": ["Users"],
+  "summary": "Update user (Admin only)",
+  "security": [{"bearerAuth": []}],
+  "parameters": [
+    {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "User ID"
+    }
+  ],
+  "requestBody": {
+    "required": true,
+    "content": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["admin", "allocator", "rider"]
+            },
+            "isActive": {
+              "type": "boolean"
+            }
+          }
+        }
       }
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "User updated successfully",
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              },
+              "data": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Validation error"
+    },
+    "403": {
+      "description": "Access denied"
+    },
+    "404": {
+      "description": "User not found"
+    }
+  }
+},
+"delete": {
+  "tags": ["Users"],
+  "summary": "Delete user (Admin only)",
+  "security": [{"bearerAuth": []}],
+  "parameters": [
+    {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "User ID"
+    }
+  ],
+  "responses": {
+    "200": {
+      "description": "User deleted successfully",
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Cannot delete self"
+    },
+    "403": {
+      "description": "Access denied"
+    },
+    "404": {
+      "description": "User not found"
+         }
+       }
+     }
     },
     "/api/v1/organizations": {
       "get": {
@@ -935,6 +1081,156 @@
         }
       }
     },
+    "/api/v1/organizations/csv": {
+      "get": {
+        "tags": ["Organizations"],
+        "summary": "Get organizations in CSV format",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Organizations in CSV format",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/{id}": {
+  "put": {
+    "tags": ["Organizations"],
+    "summary": "Update organization (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Organization ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "gstNumber": {
+                "type": "string"
+              },
+              "isActive": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Organization updated successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/Organization"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Access denied"
+      },
+      "404": {
+        "description": "Organization not found"
+      }
+    }
+  },
+  "delete": {
+    "tags": ["Organizations"],
+    "summary": "Delete organization (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Organization ID"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Organization deleted successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "Access denied"
+      },
+      "404": {
+        "description": "Organization not found"
+      }
+    }
+  }
+},
     "/api/v1/subscriptions/plans": {
       "get": {
         "tags": ["Subscriptions"],
@@ -1236,6 +1532,61 @@
         }
       }
     },
+    "/api/v1/vehicles/{id}": {
+  "put": {
+    "summary": "Update a vehicle (Admin only)",
+    "tags": ["Vehicles"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Vehicle ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string" },
+              "plateNumber": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Vehicle updated successfully" },
+      "404": { "description": "Vehicle not found" },
+      "403": { "description": "Access denied" }
+    }
+  },
+  "delete": {
+    "summary": "Delete a vehicle (Admin only)",
+    "tags": ["Vehicles"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Vehicle ID"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Vehicle deleted successfully" },
+      "404": { "description": "Vehicle not found" },
+      "403": { "description": "Access denied" }
+    }
+  }
+},
     "/api/v1/jobs": {
       "get": {
         "tags": ["Jobs"],
@@ -1366,6 +1717,18 @@
         }
       }
     },
+    "/api/v1/jobs/superadmin/csv":{
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Get all jobs in CSV format (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of jobs in CSV format"
+          }
+        }
+      }
+    },
     "/api/v1/jobs/my-jobs": {
       "get": {
         "tags": ["Jobs"],
@@ -1476,6 +1839,63 @@
         }
       }
     },
+    "/api/v1/jobs/{id}": {
+  "put": {
+    "summary": "Update a job",
+    "tags": ["Jobs"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Job ID"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "riderId": { "type": "string", "format": "uuid" },
+              "vehicleId": { "type": "string", "format": "uuid" },
+              "scheduledTime": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": { "description": "Job updated successfully" },
+      "404": { "description": "Job not found" },
+      "403": { "description": "Access denied" }
+    }
+  },
+  "delete": {
+    "summary": "Delete a job",
+    "tags": ["Jobs"],
+    "security": [{ "bearerAuth": [] }],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" },
+        "description": "Job ID"
+      }
+    ],
+    "responses": {
+      "200": { "description": "Job deleted successfully" },
+      "404": { "description": "Job not found" },
+      "403": { "description": "Access denied" }
+    }
+  }
+},
     "/api/v1/payments/create-order": {
       "post": {
         "tags": ["Payments"],
@@ -1554,6 +1974,18 @@
         }
       }
     },
+    "/api/v1/payments/superadmin/csv":{
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get payments in CSV format (Superadmin only)",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of payments in CSV format"
+          }
+        }
+      }
+    },
     "/api/v1/analytics/superadmin": {
       "get": {
         "tags": ["Analytics"],
@@ -1589,7 +2021,314 @@
           }
         }
       }
-     } 
+     },
+    "/api/v1/chargers": {
+      "get": {
+        "tags": ["Chargers"],
+        "summary": "Get all chargers",
+        "security": [{"bearerAuth": []}],
+        "description": "Fetch all chargers (only accessible to Riders).",
+        "operationId": "getChargers",
+        "responses": {
+          "200": {
+            "description": "List of chargers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Charger"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Chargers"],
+        "summary": "Create a new charger",
+        "security": [{"bearerAuth": []}],
+        "description": "Create a charger (Allocator, Admin, Superadmin only).",
+        "operationId": "createCharger",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name","latitude","longitude"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["active","inactive","under_maintenance"]
+                  },
+                  "charger-type": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Charger created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Charger"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+            }
+          }
+        }
+      },
+
+    "/api/v1/chargers/{id}": {
+  "put": {
+    "tags": ["Chargers"],
+    "summary": "Update a charger",
+    "security": [{"bearerAuth": []}],
+    "description": "Update an existing charger (Allocator, Admin, Superadmin only).",
+    "operationId": "updateCharger",
+    "parameters": [ 
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "ID of the charger to update"
+      }
+    ],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "number",
+                "format": "float"
+              },
+              "longitude": {
+                "type": "number",
+                "format": "float"
+              },
+              "address": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["active","inactive","under_maintenance"]
+              },
+              "charger-type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Charger updated successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/Charger"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Charger not found"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  },
+  
+  "delete": {
+    "tags": ["Chargers"],
+    "summary": "Delete a charger",
+    "security": [{"bearerAuth": []}],
+    "description": "Delete a charger (Allocator, Admin, Superadmin only).",
+    "operationId": "deleteCharger",
+    "parameters": [
+      {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "ID of the charger to delete"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Charger deleted successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Charger not found"
+      },
+      "500": {
+        "description": "Internal server error"
+            }
+          }
+        }
+      },
+
+"/api/v1/chargers/nearby": {
+  "post": {
+    "tags": ["Chargers"],
+    "summary": "Get chargers sorted by distance",
+    "description": "Returns all chargers sorted from nearest to farthest based on the provided latitude and longitude. Accessible by all roles.",
+    "security": [{ "bearerAuth": [] }],
+    "operationId": "getChargersByDistance",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["currentLatitude", "currentLongitude"],
+            "properties": {
+              "currentLatitude": {
+                "type": "number",
+                "format": "float",
+                "example": 12.9716
+              },
+              "currentLongitude": {
+                "type": "number",
+                "format": "float",
+                "example": 77.5946
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Chargers sorted by distance",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": true },
+                "message": { "type": "string", "example": "Chargers sorted by distance" },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      { "$ref": "#/components/schemas/Charger" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "distance": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 1.25,
+                            "description": "Distance in kilometers from the provided location"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Missing required fields"
+      },
+      "404": {
+        "description": "No chargers available"
+      },
+      "500": {
+        "description": "Internal server error"
+            }
+          }
+        }
+      }
     }
   }
  

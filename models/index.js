@@ -6,6 +6,7 @@ const Vehicle = require('./Vehicle');
 const Job = require('./Job');
 const Payment = require('./Payment');
 const JobLog = require('./JobLog');
+const Charger = require("./Charger");
 
 // User - Organization relationship
 User.belongsTo(Organization, { 
@@ -123,5 +124,6 @@ module.exports = {
   Vehicle,
   Job,
   Payment,
-  JobLog
+  JobLog,
+  Charger
 }; 

@@ -38,6 +38,74 @@ router.get('/', requireSuperadmin, async (req, res) => {
   }
 });
 
+
+//get all organizations in csv
+router.get('/csv', requireSuperadmin, async (req, res) => {
+  try {
+    const organizations = await Organization.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+
+    const csvHeaders = [
+      'Name',
+      'Email',
+      'Phone',
+      'Address',
+      'City',
+      'State',
+      'Country',
+      'GST Number',
+      'Is Active',
+      'Created At',
+      'Updated At'
+    ];
+
+    const csvRows = organizations.map(org => {
+      const orgData = org.toJSON();
+      return [
+        orgData.name || '',
+        orgData.email || '',
+        orgData.phone || '',
+        orgData.address || '',
+        orgData.city || '',
+        orgData.state || '',
+        orgData.country || '',
+        orgData.gstNumber || '',
+        orgData.isActive ? 'True' : 'False',
+        orgData.createdAt ? new Date(orgData.createdAt).toISOString() : '',
+        orgData.updatedAt ? new Date(orgData.updatedAt).toISOString() : ''
+      ];
+    });
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => 
+        row.map(field => {
+          if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
+            return `"${field.replace(/"/g, '""')}"`;
+          }
+          return field;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const filename = `organizations-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Pragma', 'no-cache');
+
+    res.status(200).send(csvContent);
+
+  } catch (error) {
+    console.error('CSV export error:', error);
+    res.status(500).json({
+      error: 'Failed to export organizations to CSV',
+      message: 'Internal server error'
+    });
+  }
+});
+
 /**
  * @swagger
  * /organizations:
@@ -109,7 +177,8 @@ router.post('/', validateOrganizationCreation, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Organization ID
  *     responses:
  *       200:
@@ -145,7 +214,7 @@ router.get('/:id', validateId, async (req, res) => {
  * @swagger
  * /organizations/{id}:
  *   put:
- *     summary: Update organization
+ *     summary: Update organization (Superadmin only)
  *     tags: [Organizations]
  *     security:
  *       - bearerAuth: []
@@ -154,7 +223,8 @@ router.get('/:id', validateId, async (req, res) => {
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         description: Organization ID
  *     requestBody:
  *       required: true
@@ -188,7 +258,7 @@ router.get('/:id', validateId, async (req, res) => {
  *       404:
  *         description: Organization not found
  */
-router.put('/:id', validateId, async (req, res) => {
+router.put('/:id', requireSuperadmin, validateId, async (req, res) => {
   try {
     const organization = await Organization.findByPk(req.params.id);
     
@@ -215,4 +285,52 @@ router.put('/:id', validateId, async (req, res) => {
   }
 });
 
-module.exports = router; 
+/**
+ * @swagger
+ * /organizations/{id}:
+ *   delete:
+ *     summary: Delete organization (Superadmin only)
+ *     tags: [Organizations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Organization ID
+ *     responses:
+ *       200:
+ *         description: Organization deleted successfully
+ *       404:
+ *         description: Organization not found
+ */
+router.delete('/:id', requireSuperadmin, validateId, async (req, res) => {
+  try {
+    const organization = await Organization.findByPk(req.params.id);
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found',
+        message: 'The specified organization does not exist'
+      });
+    }
+
+    await organization.destroy();
+
+    res.json({
+      success: true,
+      message: 'Organization deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete organization error:', error);
+    res.status(500).json({
+      error: 'Failed to delete organization',
+      message: 'Internal server error'
+    });
+  }
+});
+
+module.exports = router;

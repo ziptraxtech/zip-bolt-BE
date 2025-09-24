@@ -117,6 +117,82 @@ router.get('/', requireAllocator, validatePagination, async (req, res) => {
   }
 });
 
+//get all users in csv
+router.get('/csv', requireAllocator, async (req, res) => {
+  try {
+    const where = {};
+    
+    if (req.user.role !== 'superadmin') {
+      where.organizationId = req.user.organizationId;
+    }
+
+    if (req.query.role) {
+      where.role = req.query.role;
+    }
+    if (req.query.isActive !== undefined) {
+      where.isActive = req.query.isActive === 'true';
+    }
+
+    const users = await User.findAll({
+      where,
+      include: ['organization'],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const csvHeaders = [
+      'Email',
+      'First Name',
+      'Last Name',
+      'Role',
+      'Is Active',
+      'Organization Name',
+      'Created At',
+      'Updated At'
+    ];
+
+    const csvRows = users.map(user => {
+      const userData = user.toJSON();
+      return [
+        userData.email || '',
+        userData.firstName || '',
+        userData.lastName || '',
+        userData.role || '',
+        userData.isActive ? 'Yes' : 'No',
+        userData.organization?.name || '',
+        userData.createdAt ? new Date(userData.createdAt).toISOString() : '',
+        userData.updatedAt ? new Date(userData.updatedAt).toISOString() : ''
+      ];
+    });
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => 
+        row.map(field => {
+          if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
+            return `"${field.replace(/"/g, '""')}"`;
+          }
+          return field;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const filename = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Pragma', 'no-cache');
+
+    res.status(200).send(csvContent);
+
+  } catch (error) {
+    console.error('CSV export error:', error);
+    res.status(500).json({
+      error: 'Failed to export users to CSV',
+      message: 'Internal server error'
+    });
+  }
+});
+
 /**
  * @swagger
  * /users:
@@ -328,16 +404,15 @@ router.get('/:id', requireResourceAccess('user'), async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.put('/:id', requireResourceAccess('user'), async (req, res) => {
+router.put('/:id', requireAdmin, requireResourceAccess('user'), async (req, res) => {
   try {
-    const { firstName, lastName, phone, role, isActive } = req.body;
+    const { firstName, lastName, phone, role, isActive, email } = req.body;
     const user = req.resource;
 
-    // Only superadmin can change roles
-    if (role && req.user.role !== 'superadmin') {
+    if (role && req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'Only superadmin can change user roles'
+        message: 'Only superadmin and admin can change user roles'
       });
     }
 
@@ -346,6 +421,7 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
       phone: phone !== undefined ? phone : user.phone,
+      email: email || user.email,
       role: role || user.role,
       isActive: isActive !== undefined ? isActive : user.isActive
     });
@@ -499,4 +575,4 @@ router.get('/organization/:organizationId', requireAllocator, async (req, res) =
   }
 });
 
-module.exports = router; 
+module.exports = router;

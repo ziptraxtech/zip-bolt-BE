@@ -207,4 +207,80 @@ router.get('/superadmin', authenticateToken, requireSuperadmin, async (req, res)
   }
 });
 
+
+router.get('/superadmin/csv', authenticateToken, requireSuperadmin, async (req, res) => {
+  try {
+    const payments = await Payment.findAll({
+      include: [
+        {
+          model: Subscription,
+          as: 'subscription',
+          include: [
+            {
+              model: Organization,
+              as: 'organization',
+              attributes: ['name']
+            }
+          ]
+        }
+      ]
+    });
+
+    const csvHeaders = [
+      'Organization Name',
+      'Amount',
+      'Currency',
+      'Status',
+      'Payment Date',
+      'Razorpay Order ID',
+      'Razorpay Payment ID',
+      'Created At',
+      'Updated At'
+    ];
+
+    const csvRows = payments.map(payment => {
+      const paymentData = payment.toJSON();
+      return [
+        paymentData.subscription?.organization?.name || '',
+        paymentData.amount || '',
+        paymentData.currency || '',
+        paymentData.status || '',
+        paymentData.paidAt ? new Date(paymentData.paidAt).toISOString() : '',
+        paymentData.razorpayOrderId || '',
+        paymentData.razorpayPaymentId || '',
+        paymentData.createdAt ? new Date(paymentData.createdAt).toISOString() : '',
+        paymentData.updatedAt ? new Date(paymentData.updatedAt).toISOString() : ''
+      ];
+    });
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => 
+        row.map(field => {
+          if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n')))
+          if (typeof field === 'string' && (field.includes(',') || field.includes('"') || field.includes('\n'))) {
+            return `"${field.replace(/"/g, '""')}"`;
+          }
+          return field;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const filename = `payments-export-${new Date().toISOString().split('T')[0]}.csv`;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Pragma', 'no-cache');
+
+    res.status(200).send(csvContent);
+
+  } catch (error) {
+    console.error('CSV export error:', error);
+    res.status(500).json({
+      error: 'Failed to export payments to CSV',
+      message: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router; 
