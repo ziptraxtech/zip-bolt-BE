@@ -407,7 +407,7 @@ router.get('/:id', requireResourceAccess('user'), async (req, res) => {
 router.put('/:id', validateId, async (req, res) => {
   try {
     // Check permissions first
-    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin' && req.user.role !== 'rider') {
       return res.status(403).json({
         error: 'Access denied',
         message: 'Only superadmin and admin can update users'
