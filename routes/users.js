@@ -1,7 +1,7 @@
 const express = require('express');
 const { User, Organization } = require('../models');
 const { validateUserRegistration, validatePagination, validateId } = require('../middleware/validation');
-const { requireAdmin, requireResourceAccess, requireAllocator } = require('../middleware/auth');
+const { requireAdmin, requireResourceAccess, requireAllocator, requireSuperadmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -118,7 +118,6 @@ router.get('/', requireAllocator, validatePagination, async (req, res) => {
 });
 
 //get all users in csv
-
 router.get('/csv', requireAllocator, async (req, res) => {
   try {
     const where = {};
@@ -405,16 +404,48 @@ router.get('/:id', requireResourceAccess('user'), async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.put('/:id', requireResourceAccess('user'), async (req, res) => {
+router.put('/:id', validateId, async (req, res) => {
   try {
-    const { firstName, lastName, phone, role, isActive } = req.body;
-    const user = req.resource;
-
-    // Only superadmin can change roles
-    if (role && req.user.role !== 'superadmin') {
+    // Check permissions first
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       return res.status(403).json({
         error: 'Access denied',
-        message: 'Only superadmin can change user roles'
+        message: 'Only superadmin and admin can update users'
+      });
+    }
+
+    const user = await User.findByPk(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'The specified user does not exist'
+      });
+    }
+
+    // Non-superadmin users can only access their organization's users
+    if (req.user.role !== 'superadmin' && user.organizationId !== req.user.organizationId) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'You can only access users from your organization'
+      });
+    }
+
+    const { firstName, lastName, phone, latitude, longitude,role, isActive, email } = req.body;
+
+    // Check role change permissions
+    if (role && req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Only superadmin and admin can change user roles'
+      });
+    }
+
+    // Admin cannot modify superadmin users (but superadmin can modify anyone)
+    if (req.user.role === 'admin' && user.role === 'superadmin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Admin cannot modify superadmin users'
       });
     }
 
@@ -423,6 +454,9 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
       phone: phone !== undefined ? phone : user.phone,
+      email: email || user.email,
+      latitude:latitude !== undefined ? latitude : user.latitude,
+      longitude: longitude !== undefined ? longitude : user.longitude,
       role: role || user.role,
       isActive: isActive !== undefined ? isActive : user.isActive
     });
@@ -445,7 +479,7 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Delete user (Admin only)
+ *     summary: Permanently delete user (Admin only)
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -458,7 +492,7 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
  *         description: User ID
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         description: User deleted permanently
  *         content:
  *           application/json:
  *             schema:
@@ -473,9 +507,32 @@ router.put('/:id', requireResourceAccess('user'), async (req, res) => {
  *       404:
  *         description: User not found
  */
-router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, res) => {
+router.delete('/:id', validateId, async (req, res) => {
   try {
-    const user = req.resource;
+    // Check permissions first
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Only superadmin and admin can delete users'
+      });
+    }
+
+    const user = await User.findByPk(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'The specified user does not exist'
+      });
+    }
+
+    // Non-superadmin users can only access their organization's users
+    if (req.user.role !== 'superadmin' && user.organizationId !== req.user.organizationId) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'You can only access users from your organization'
+      });
+    }
 
     // Prevent self-deletion
     if (user.id === req.user.id) {
@@ -485,12 +542,20 @@ router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, r
       });
     }
 
-    // Soft delete by deactivating
-    await user.update({ isActive: false });
+    // Admin cannot delete superadmin users (but superadmin can delete anyone including other superadmins)
+    if (req.user.role === 'admin' && user.role === 'superadmin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Admin cannot delete superadmin users'
+      });
+    }
+
+    // Hard delete (permanent)
+    await user.destroy();
 
     res.json({
       success: true,
-      message: 'User deactivated successfully'
+      message: 'User deleted permanently'
     });
   } catch (error) {
     console.error('Delete user error:', error);
@@ -500,6 +565,7 @@ router.delete('/:id', requireAdmin, requireResourceAccess('user'), async (req, r
     });
   }
 });
+
 
 /**
  * @swagger
@@ -576,4 +642,4 @@ router.get('/organization/:organizationId', requireAllocator, async (req, res) =
   }
 });
 
-module.exports = router; 
+module.exports = router;
