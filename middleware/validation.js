@@ -46,7 +46,7 @@ const validateUserRegistration = [
     .withMessage('Please provide a valid phone number'),
   body('role')
     .optional()
-    .isIn(['admin', 'allocator', 'rider'])
+    .isIn(['superadmin', 'admin', 'allocator', 'rider'])
     .withMessage('Invalid role specified'),
   handleValidationErrors
 ];
