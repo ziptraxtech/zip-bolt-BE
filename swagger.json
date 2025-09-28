@@ -890,6 +890,137 @@
             }
           }
         }
+      },
+"put": {
+  "tags": ["Users"],
+  "summary": "Update user (Admin only)",
+  "security": [{"bearerAuth": []}],
+  "parameters": [
+    {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "User ID"
+    }
+  ],
+  "requestBody": {
+    "required": true,
+    "content": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["admin", "allocator", "rider"]
+            },
+            "isActive": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "description": "User updated successfully",
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              },
+              "data": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Validation error"
+    },
+    "403": {
+      "description": "Access denied"
+    },
+    "404": {
+      "description": "User not found"
+    }
+  }
+},
+"delete": {
+  "tags": ["Users"],
+  "summary": "Permanently delete user (Admin only)",
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "parameters": [
+    {
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "User ID"
+    }
+  ],
+  "responses": {
+    "200": {
+      "description": "User deleted permanently",
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "400": {
+      "description": "Cannot delete self"
+    },
+    "403": {
+      "description": "Access denied"
+    },
+    "404": {
+      "description": "User not found"
+          }
+        }
       }
     },
     "/api/v1/organizations": {
