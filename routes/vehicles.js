@@ -8,7 +8,14 @@ const router = express.Router();
 // Get all vehicles
 router.get('/', requireAdmin, async (req, res) => {
   try {
-    const vehicles = await Vehicle.findByOrganization(req.user.organizationId);
+    let vehicles;
+    
+    if (req.user.role === 'superadmin') {
+      vehicles = await Vehicle.findAll();
+    } else {
+      vehicles = await Vehicle.findByOrganization(req.user.organizationId);
+    }
+    
     res.json({
       success: true,
       data: vehicles
