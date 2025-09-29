@@ -7,6 +7,7 @@ const Job = require('./Job');
 const Payment = require('./Payment');
 const JobLog = require('./JobLog');
 const Charger = require("./Charger");
+const VehicleCategory = require('./VehicleCategory'); 
 
 // User - Organization relationship
 User.belongsTo(Organization, { 
@@ -34,6 +35,16 @@ Job.belongsTo(User, {
 Job.belongsTo(User, { 
   foreignKey: 'riderId', 
   as: 'rider' 
+});
+
+// VehicleCategory - Vehicle relationship 
+VehicleCategory.hasMany(Vehicle, {
+  foreignKey: 'vehicleCategoryId',
+  as: 'vehicles'
+});
+Vehicle.belongsTo(VehicleCategory, {
+  foreignKey: 'vehicleCategoryId',
+  as: 'category'
 });
 
 // Organization - Vehicle relationship
@@ -125,5 +136,6 @@ module.exports = {
   Job,
   Payment,
   JobLog,
-  Charger
+  Charger,
+  VehicleCategory
 }; 

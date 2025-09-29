@@ -1607,6 +1607,153 @@
     }
   }
 },
+"/api/v1/vehicle-categories": {
+  "get": {
+    "tags": ["Vehicle Categories"],
+    "summary": "Get all vehicle categories",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "query",
+        "name": "isActive",
+        "schema": {
+          "type": "boolean"
+        },
+        "description": "Filter by active status"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "List of vehicle categories",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleCategory"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  },
+  "post": {
+    "tags": ["Vehicle Categories"],
+    "summary": "Create vehicle category (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "Two Wheeler",
+                "minLength": 2,
+                "maxLength": 100
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "201": {
+        "description": "Vehicle category created successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "data": {
+                  "$ref": "#/components/schemas/VehicleCategory"
+                }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Validation error"
+      },
+      "409": {
+        "description": "Category already exists"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  }
+},
+"/api/v1/vehicle-categories/{id}": {
+  "delete": {
+    "tags": ["Vehicle Categories"],
+    "summary": "Delete vehicle category (Superadmin only)",
+    "security": [{"bearerAuth": []}],
+    "parameters": [
+      {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Vehicle category ID"
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Category deleted successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "Category not found"
+      },
+      "409": {
+        "description": "Category is in use by vehicles"
+      },
+      "500": {
+        "description": "Internal server error"
+      }
+    }
+  }
+},
     "/api/v1/jobs": {
       "get": {
         "tags": ["Jobs"],

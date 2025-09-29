@@ -22,6 +22,7 @@ const analyticsRoutes = require('./routes/analytics');
 const subscriptionPlanRoutes = require('./routes/subscriptionPlans');
 const { authenticateToken } = require('./middleware/auth');
 const chargerRoutes = require('./routes/chargers');
+const vehicleCategoryRoutes = require('./routes/vehicleCategories');
 
 const app = express();
 const server = createServer(app);
@@ -115,6 +116,7 @@ app.use('/api/v1/payments', authenticateToken, paymentRoutes);
 app.use('/api/v1/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/v1/subscriptionPlans', authenticateToken, subscriptionPlanRoutes);
 app.use('/api/v1/chargers', authenticateToken, chargerRoutes);
+app.use('/api/v1/vehicle-categories', authenticateToken, vehicleCategoryRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
