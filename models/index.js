@@ -97,6 +97,16 @@ Subscription.belongsTo(SubscriptionPlan, {
   as: 'plan' 
 });
 
+Subscription.belongsTo(SubscriptionPlan, { 
+  foreignKey: 'userPlanId', 
+  as: 'userPlan' 
+});
+
+Subscription.belongsTo(SubscriptionPlan, { 
+  foreignKey: 'vehiclePlanId', 
+  as: 'vehiclePlan' 
+});
+
 // Subscription - Payment relationship
 Subscription.hasMany(Payment, { 
   foreignKey: 'subscriptionId', 

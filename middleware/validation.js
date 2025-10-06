@@ -245,8 +245,31 @@ const validateJobStatusUpdate = [
  */
 const validateSubscriptionCreation = [
   body('planId')
+    .optional()
     .isUUID()
     .withMessage('Please provide a valid plan ID'),
+  body('userPlanId')
+    .optional()
+    .isUUID()
+    .withMessage('Please provide a valid user plan ID'),
+  body('vehiclePlanId')
+    .optional()
+    .isUUID()
+    .withMessage('Please provide a valid vehicle plan ID'),
+  body()
+    .custom((value, { req }) => {
+      // At least one plan must be provided
+      if (!req.body.planId && !req.body.userPlanId && !req.body.vehiclePlanId) {
+        throw new Error('Please provide at least one plan (planId, userPlanId, or vehiclePlanId)');
+      }
+      
+      // Cannot use planId with userPlanId/vehiclePlanId
+      if (req.body.planId && (req.body.userPlanId || req.body.vehiclePlanId)) {
+        throw new Error('Cannot use planId together with userPlanId or vehiclePlanId. Use either planId for combo plans or separate user/vehicle plan IDs');
+      }
+      
+      return true;
+    }),
   handleValidationErrors
 ];
 
@@ -263,18 +286,57 @@ const validateSubscriptionPlanCreation = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage('Description must not exceed 2000 characters'),
+  body('planType')
+    .isIn(['user', 'vehicle', 'combo'])
+    .withMessage('Plan type must be one of: user, vehicle, combo'),
   body('price')
     .isFloat({ min: 0 })
     .withMessage('Price must be a positive number'),
   body('maxVehicles')
-    .isInt({ min: 1 })
-    .withMessage('Max vehicles must be a positive integer'),
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Max vehicles must be zero or a positive integer'),
   body('maxUsers')
-    .isInt({ min: 1 })
-    .withMessage('Max users must be a positive integer'),
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Max users must be zero or a positive integer'),
   body('durationDays')
     .isInt({ min: 1 })
     .withMessage('Duration days must be a positive integer'),
+  body()
+    .custom((value, { req }) => {
+      const { planType, maxVehicles, maxUsers } = req.body;
+      
+      // Validate based on plan type
+      if (planType === 'user') {
+        if (!maxUsers || maxUsers <= 0) {
+          throw new Error('User plans must have maxUsers greater than 0');
+        }
+        if (maxVehicles && maxVehicles > 0) {
+          throw new Error('User plans should have maxVehicles set to 0 or undefined');
+        }
+      }
+      
+      if (planType === 'vehicle') {
+        if (!maxVehicles || maxVehicles <= 0) {
+          throw new Error('Vehicle plans must have maxVehicles greater than 0');
+        }
+        if (maxUsers && maxUsers > 0) {
+          throw new Error('Vehicle plans should have maxUsers set to 0 or undefined');
+        }
+      }
+      
+      if (planType === 'combo') {
+        if (!maxVehicles || maxVehicles <= 0) {
+          throw new Error('Combo plans must have maxVehicles greater than 0');
+        }
+        if (!maxUsers || maxUsers <= 0) {
+          throw new Error('Combo plans must have maxUsers greater than 0');
+        }
+      }
+      
+      return true;
+    }),
   handleValidationErrors
 ];
 

@@ -76,6 +76,24 @@ const Subscription = sequelize.define('Subscription', {
       key: 'id'
     }
   },
+  userPlanId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'user_plan_id',
+    references: {
+      model: 'subscription_plans',
+      key: 'id'
+    }
+  },
+  vehiclePlanId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    field: 'vehicle_plan_id',
+    references: {
+      model: 'subscription_plans',
+      key: 'id'
+    }
+  },
   startDate: {
     type: DataTypes.DATE,
     allowNull: false

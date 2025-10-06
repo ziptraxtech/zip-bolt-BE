@@ -64,6 +64,12 @@ const SubscriptionPlan = sequelize.define('SubscriptionPlan', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  planType: {
+    type: DataTypes.ENUM('user', 'vehicle', 'combo'),
+    allowNull: false,
+    defaultValue: 'combo',
+    field: 'plan_type'
+  },
   price: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
@@ -75,14 +81,14 @@ const SubscriptionPlan = sequelize.define('SubscriptionPlan', {
     type: DataTypes.INTEGER,
     allowNull: false,
     validate: {
-      min: 1
+      min: 0
     }
   },
   maxUsers: {
     type: DataTypes.INTEGER,
     allowNull: false,
     validate: {
-      min: 1
+      min: 0
     }
   },
   durationDays: {
@@ -117,6 +123,13 @@ SubscriptionPlan.findActive = function() {
 
 SubscriptionPlan.findByName = function(name) {
   return this.findOne({ where: { name } });
+};
+
+SubscriptionPlan.findByType = function(planType) {
+  return this.findAll({ 
+    where: { planType,
+      isActive: true 
+    } });
 };
 
 module.exports = SubscriptionPlan; 
